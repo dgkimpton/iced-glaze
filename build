@@ -1,0 +1,1 @@
+RUST_BACKTRACE=1 cargo watch -x "llvm-cov --workspace --exclude-from-report glazed --ignore-filename-regex '(^|/)(glazed)/' --no-cfg-coverage  --lcov --output-path lcov.info && ./check_coverage"
