@@ -1,9 +1,11 @@
 
 [workspace]
 resolver = "2"
-members=[""]
-default-members=[""]
+members=["ci-test","glazed"]
+default-members=["glazed"]
 
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)'] }
 
 [workspace.dependencies]
-iced = {version= "0.14", features=["advanced", "image", "canvas"] }
+iced = {git = "https://github.com/iced-rs/iced", branch = "master"}

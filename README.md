@@ -1,7 +1,8 @@
 # iced-glaze
 Widgets for the [Iced](https://iced.rs/) ui project for [Rust](https://rust-lang.org/)
 
-[![License](https://img.shields.io/crates/l/spoke.svg)](https://github.com/dgkimpton/iced-glaze/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/dgkimpton/iced-glaze/blob/main/LICENSE)
+[![codecov](https://codecov.io/github/dgkimpton/iced-glaze/graph/badge.svg?token=UOJYBA9QLL)](https://codecov.io/github/dgkimpton/iced-glaze)
 
 ## Reason
 These widgets are an attempt to create the widgets I wish I had available when developing Iced UI applications.

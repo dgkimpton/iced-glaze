@@ -1,0 +1,5 @@
+cargo llvm-cov \
+  --workspace \
+  --exclude-from-report glazed \
+  --ignore-filename-regex '(^|/)(glazed)/' \
+  --no-cfg-coverage
