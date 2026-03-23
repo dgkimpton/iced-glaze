@@ -1,11 +1,12 @@
 
 [workspace]
 resolver = "2"
-members=["ci-test","glazed"]
+members=["fancybutton","glazed"]
 default-members=["glazed"]
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)'] }
 
 [workspace.dependencies]
-iced = {git = "https://github.com/iced-rs/iced", branch = "master"}
+fancybutton = { path = "./fancybutton" }
+iced = { git = "https://github.com/iced-rs/iced",  branch = "0.14",  features=["advanced"] }
