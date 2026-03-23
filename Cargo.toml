@@ -1,0 +1,9 @@
+
+[workspace]
+resolver = "2"
+members=[""]
+default-members=[""]
+
+
+[workspace.dependencies]
+iced = {version= "0.14", features=["advanced", "image", "canvas"] }
