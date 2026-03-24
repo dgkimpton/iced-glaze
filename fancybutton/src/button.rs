@@ -17,10 +17,13 @@
 //! }
 //! ```
 use iced::advanced::{
-    Layout, Shell, Widget, clipboard::Clipboard, layout, mouse, overlay, renderer, widget::{
+    Layout, Shell, Widget,
+    layout, mouse, overlay, renderer,
+    widget::{
         Operation,
         tree::{self, Tree},
-    }
+    },
+    Clipboard
 };
 use iced::border::{self, Border};
 use iced::theme::palette;
