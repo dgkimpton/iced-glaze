@@ -2,18 +2,17 @@
 //!
 //! # Example
 //! ```no_run
-//! # mod iced { pub mod widget { pub use iced_widget::*; } }
 //! # pub type State = ();
-//! # pub type Element<'a, Message> = iced_widget::core::Element<'a, Message, iced_widget::Theme, iced_widget::Renderer>;
-//! use iced::widget::FancyButton;
+//! # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
+//! use crate::fancybutton::button;
 //!
 //! #[derive(Clone)]
 //! enum Message {
-//!     FancyButtonPressed,
+//!     ButtonPressed,
 //! }
 //!
 //! fn view(state: &State) -> Element<'_, Message> {
-//!     FancyButton("Press me!").on_press(Message::FancyButtonPressed).into()
+//!     button("Press me!").on_press(Message::ButtonPressed).into()
 //! }
 //! ```
 use iced::advanced::{
@@ -34,18 +33,17 @@ use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 ///
 /// # Example
 /// ```no_run
-/// # mod iced { pub mod widget { pub use iced_widget::*; } }
 /// # pub type State = ();
-/// # pub type Element<'a, Message> = iced_widget::core::Element<'a, Message, iced_widget::Theme, iced_widget::Renderer>;
-/// use iced::widget::FancyButton;
+/// # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
+/// use fancybutton::button;
 ///
 /// #[derive(Clone)]
 /// enum Message {
-///     FancyButtonPressed,
+///     ButtonPressed,
 /// }
 ///
 /// fn view(state: &State) -> Element<'_, Message> {
-///     FancyButton("Press me!").on_press(Message::FancyButtonPressed).into()
+///     button("Press me!").on_press(Message::ButtonPressed).into()
 /// }
 /// ```
 ///
@@ -53,18 +51,17 @@ use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 /// be disabled:
 ///
 /// ```no_run
-/// # mod iced { pub mod widget { pub use iced_widget::*; } }
 /// # pub type State = ();
-/// # pub type Element<'a, Message> = iced_widget::core::Element<'a, Message, iced_widget::Theme, iced_widget::Renderer>;
-/// use iced::widget::FancyButton;
+/// # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
+/// use fancybutton::button;
 ///
 /// #[derive(Clone)]
 /// enum Message {
-///     FancyButtonPressed,
+///     ButtonPressed,
 /// }
 ///
 /// fn view(state: &State) -> Element<'_, Message> {
-///     FancyButton("I am disabled!").into()
+///     button("I am disabled!").into()
 /// }
 /// ```
 pub struct FancyButton<

@@ -16,8 +16,10 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 ///
 /// # Example
 /// ```no_run
-/// # use iced_widget::core::{Color, Background};
-/// # use iced_widget::button::{Catalog, Status, Style};
+/// # use iced::{Color, Background};
+/// # use fancybutton::button::{Status};
+/// # use fancybutton::visual::{Catalog};
+/// # use fancybutton::standard::{Style};
 /// # struct MyTheme;
 /// #[derive(Debug, Default)]
 /// pub enum ButtonClass {
