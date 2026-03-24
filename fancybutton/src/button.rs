@@ -23,7 +23,6 @@ use iced::advanced::{
         Operation,
         tree::{self, Tree},
     },
-    Clipboard
 };
 use iced::border::{self, Border};
 use iced::theme::palette;
@@ -32,7 +31,6 @@ use iced::window;
 use iced::{
     Background, Color, Element, Event, Length, Padding, Rectangle, Shadow, Size, Theme, Vector,
 };
-
 /// A generic widget that produces a message when pressed.
 ///
 /// # Example
@@ -268,7 +266,6 @@ where
         layout: Layout<'_>,
         cursor: mouse::Cursor,
         renderer: &Renderer,
-        clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
     ) {
@@ -278,7 +275,6 @@ where
             layout.children().next().unwrap(),
             cursor,
             renderer,
-            clipboard,
             shell,
             viewport,
         );
@@ -581,7 +577,7 @@ impl Catalog for Theme {
 
 /// A primary FancyButton; denoting a main action.
 pub fn primary(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.primary.base);
 
     match status {
@@ -596,7 +592,7 @@ pub fn primary(theme: &Theme, status: Status) -> Style {
 
 /// A secondary FancyButton; denoting a complementary action.
 pub fn secondary(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.secondary.base);
 
     match status {
@@ -611,7 +607,7 @@ pub fn secondary(theme: &Theme, status: Status) -> Style {
 
 /// A success FancyButton; denoting a good outcome.
 pub fn success(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.success.base);
 
     match status {
@@ -626,7 +622,7 @@ pub fn success(theme: &Theme, status: Status) -> Style {
 
 /// A warning FancyButton; denoting a risky action.
 pub fn warning(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.warning.base);
 
     match status {
@@ -641,7 +637,7 @@ pub fn warning(theme: &Theme, status: Status) -> Style {
 
 /// A danger FancyButton; denoting a destructive action.
 pub fn danger(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.danger.base);
 
     match status {
@@ -656,7 +652,7 @@ pub fn danger(theme: &Theme, status: Status) -> Style {
 
 /// A text FancyButton; useful for links.
 pub fn text(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
 
     let base = Style {
         text_color: palette.background.base.text,
@@ -675,7 +671,7 @@ pub fn text(theme: &Theme, status: Status) -> Style {
 
 /// A FancyButton using background shades.
 pub fn background(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.background.base);
 
     match status {
@@ -694,7 +690,7 @@ pub fn background(theme: &Theme, status: Status) -> Style {
 
 /// A subtle FancyButton using weak background shades.
 pub fn subtle(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
+    let palette = theme.palette();
     let base = styled(palette.background.weakest);
 
     match status {

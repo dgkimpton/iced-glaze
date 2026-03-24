@@ -9,4 +9,4 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)
 
 [workspace.dependencies]
 fancybutton = { path = "./fancybutton" }
-iced = { version = "0.14", features = ["advanced"]}
+iced = { git = "https://github.com/iced-rs/iced",  branch = "master",  features=["advanced"] }

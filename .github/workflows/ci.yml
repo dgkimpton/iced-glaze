@@ -19,7 +19,7 @@ jobs:
           - nightly
 
         iced:
-          - release
+          - dev
 
     steps:
       - uses: actions/checkout@v5
@@ -29,13 +29,13 @@ jobs:
       - run: cargo test --verbose
 
       - name: rust install
-        if: matrix.toolchain == 'stable' && matrix.iced == 'release'
+        if: matrix.toolchain == 'stable'
         run: |
           rustup component add llvm-tools-preview
           cargo install cargo-llvm-cov --locked
 
       - name: coverage generate
-        if: matrix.toolchain == 'stable' && matrix.iced == 'release'
+        if: matrix.toolchain == 'stable'
         run: |
           cargo llvm-cov \
             --workspace \
@@ -46,7 +46,7 @@ jobs:
             --output-path ./target/lcov.info
 
       - name: coverage report
-        if: matrix.toolchain == 'stable' && matrix.iced == 'release'
+        if: matrix.toolchain == 'stable'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
