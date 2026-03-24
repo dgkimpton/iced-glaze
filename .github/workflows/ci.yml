@@ -16,12 +16,10 @@ jobs:
       matrix:
         toolchain:
           - stable
-          - beta
           - nightly
 
         iced:
           - release
-          - dev
 
     steps:
       - uses: actions/checkout@v5
