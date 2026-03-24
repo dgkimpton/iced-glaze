@@ -1,5 +1,5 @@
 [package]
-name = "fancybutton"
+name = "iced_plus"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,7 +8,6 @@ advanced = ["iced/advanced"]
 
 [dependencies]
 iced.workspace = true
-iced_plus.workspace = true
 
 [lints]
 workspace = true

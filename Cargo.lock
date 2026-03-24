@@ -767,6 +767,7 @@ name = "fancybutton"
 version = "0.1.0"
 dependencies = [
  "iced",
+ "iced_plus",
 ]
 
 [[package]]
@@ -1238,6 +1239,13 @@ dependencies = [
  "rustc-hash 2.1.1",
  "thiserror 2.0.18",
  "unicode-segmentation",
+]
+
+[[package]]
+name = "iced_plus"
+version = "0.1.0"
+dependencies = [
+ "iced",
 ]
 
 [[package]]

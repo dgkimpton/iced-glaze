@@ -17,21 +17,18 @@
 //! }
 //! ```
 use iced::advanced::{
-    Layout, Shell, Widget,
-    layout, mouse, overlay, renderer,
+    self, Clipboard, Layout, Shell, Widget, layout, mouse, overlay, renderer,
     widget::{
         Operation,
         tree::{self, Tree},
     },
-    Clipboard
 };
-use iced::border::{self, Border};
-use iced::theme::palette;
 use iced::touch;
 use iced::window;
-use iced::{
-    Background, Color, Element, Event, Length, Padding, Rectangle, Shadow, Size, Theme, Vector,
-};
+use iced::{Element, Event, Length, Padding, Rectangle, Size, Vector};
+use iced_plus::PaddingExtensions;
+
+use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 
 /// A generic widget that produces a message when pressed.
 ///
@@ -70,11 +67,19 @@ use iced::{
 ///     FancyButton("I am disabled!").into()
 /// }
 /// ```
-pub struct FancyButton<'a, Message, Theme = crate::Theme, Renderer = crate::Renderer>
-where
-    Renderer: iced::advanced::Renderer,
-    Theme: Catalog,
+pub struct FancyButton<
+    'a,
+    Message,
+    Theme = crate::Theme,
+    Renderer = crate::Renderer,
+    ActiveVisual = super::standard::ButtonVisual,
+> where
+    ActiveVisual: Visual<Renderer>,
+    ActiveVisual::Style: VisualStyle,
+    Renderer: advanced::renderer::Renderer,
+    Theme: Catalog<ActiveVisual::Style>,
 {
+    visual: ActiveVisual,
     content: Element<'a, Message, Theme, Renderer>,
     on_press: Option<OnPress<'a, Message>>,
     width: Length,
@@ -99,22 +104,29 @@ impl<Message: Clone> OnPress<'_, Message> {
     }
 }
 
-impl<'a, Message, Theme, Renderer> FancyButton<'a, Message, Theme, Renderer>
+impl<'a, Message, Theme, Renderer, ActiveVisual>
+    FancyButton<'a, Message, Theme, Renderer, ActiveVisual>
 where
-    Renderer: iced::advanced::Renderer,
-    Theme: Catalog,
+    Renderer: advanced::renderer::Renderer,
+    ActiveVisual: Visual<Renderer>,
+    Theme: Catalog<ActiveVisual::Style>,
+    ActiveVisual::Style: VisualStyle,
 {
-    /// Creates a new [`FancyButton`] with the given content.
-    pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+    /// Creates a new [`Button`] with the given content.
+    pub fn new(
+        content: impl Into<Element<'a, Message, Theme, Renderer>>,
+        visual: ActiveVisual,
+    ) -> Self {
         let content = content.into();
         let size = content.as_widget().size_hint();
 
         FancyButton {
+            visual,
             content,
             on_press: None,
             width: size.width.fluid(),
             height: size.height.fluid(),
-            padding: DEFAULT_PADDING,
+            padding: DEFAULT_CONTENT_PADDING,
             clip: false,
             class: Theme::default(),
             status: None,
@@ -176,17 +188,17 @@ where
         self
     }
 
-    /// Sets the style of the [`FancyButton`].
+    /// Sets the style of the [`Button`].
     #[must_use]
-    pub fn style(mut self, style: impl Fn(&Theme, Status) -> Style + 'a) -> Self
+    pub fn style(mut self, style: impl Fn(&Theme, Status) -> ActiveVisual::Style + 'a) -> Self
     where
-        Theme::Class<'a>: From<StyleFn<'a, Theme>>,
+        Theme::Class<'a>: From<StyleFn<'a, Theme, ActiveVisual::Style>>,
     {
-        self.class = (Box::new(style) as StyleFn<'a, Theme>).into();
+        self.class = (Box::new(style) as StyleFn<'a, Theme, ActiveVisual::Style>).into();
         self
     }
 
-    /// Sets the style class of the [`FancyButton`].
+    /// Sets the style class of the [`Button`].
     #[cfg(feature = "advanced")]
     #[must_use]
     pub fn class(mut self, class: impl Into<Theme::Class<'a>>) -> Self {
@@ -200,12 +212,14 @@ struct State {
     is_pressed: bool,
 }
 
-impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer>
-    for FancyButton<'a, Message, Theme, Renderer>
+impl<'a, Message, Theme, Renderer, ActiveVisual> Widget<Message, Theme, Renderer>
+    for FancyButton<'a, Message, Theme, Renderer, ActiveVisual>
 where
     Message: 'a + Clone,
-    Renderer: 'a + iced::advanced::Renderer,
-    Theme: Catalog,
+    Renderer: 'a + advanced::renderer::Renderer,
+    ActiveVisual: Visual<Renderer>,
+    ActiveVisual::Style: VisualStyle,
+    Theme: Catalog<ActiveVisual::Style>,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -236,11 +250,17 @@ where
         renderer: &Renderer,
         limits: &layout::Limits,
     ) -> layout::Node {
-        layout::padded(limits, self.width, self.height, self.padding, |limits| {
-            self.content
-                .as_widget_mut()
-                .layout(&mut tree.children[0], renderer, limits)
-        })
+        layout::padded(
+            limits,
+            self.width,
+            self.height,
+            self.padding.expand(ActiveVisual::VISUAL_SIZE),
+            |limits| {
+                self.content
+                    .as_widget_mut()
+                    .layout(&mut tree.children[0], renderer, limits)
+            },
+        )
     }
 
     fn operate(
@@ -290,16 +310,12 @@ where
         match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
-                if self.on_press.is_some() {
-                    let bounds = layout.bounds();
+                if self.on_press.is_some() && self.visual.hit_test(layout, &self.padding, cursor) {
+                    let state = tree.state.downcast_mut::<State>();
 
-                    if cursor.is_over(bounds) {
-                        let state = tree.state.downcast_mut::<State>();
+                    state.is_pressed = true;
 
-                        state.is_pressed = true;
-
-                        shell.capture_event();
-                    }
+                    shell.capture_event();
                 }
             }
             Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
@@ -310,9 +326,7 @@ where
                     if state.is_pressed {
                         state.is_pressed = false;
 
-                        let bounds = layout.bounds();
-
-                        if cursor.is_over(bounds) {
+                        if self.visual.hit_test(layout, &self.padding, cursor) {
                             shell.publish(on_press.get());
                         }
 
@@ -330,7 +344,7 @@ where
 
         let current_status = if self.on_press.is_none() {
             Status::Disabled
-        } else if cursor.is_over(layout.bounds()) {
+        } else if self.visual.hit_test(layout, &self.padding, cursor) {
             let state = tree.state.downcast_ref::<State>();
 
             if state.is_pressed {
@@ -354,46 +368,41 @@ where
         tree: &Tree,
         renderer: &mut Renderer,
         theme: &Theme,
-        _style: &renderer::Style,
+        render_style: &renderer::Style,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
         viewport: &Rectangle,
     ) {
-        let bounds = layout.bounds();
-        let content_layout = layout.children().next().unwrap();
-        let style = theme.style(&self.class, self.status.unwrap_or(Status::Disabled));
-
-        if style.background.is_some() || style.border.width > 0.0 || style.shadow.color.a > 0.0 {
-            renderer.fill_quad(
-                renderer::Quad {
-                    bounds,
-                    border: style.border,
-                    shadow: style.shadow,
-                    snap: style.snap,
-                },
-                style
-                    .background
-                    .unwrap_or(Background::Color(Color::TRANSPARENT)),
-            );
-        }
-
         let viewport = if self.clip {
-            bounds.intersection(viewport).unwrap_or(*viewport)
+            layout.bounds().intersection(viewport).unwrap_or(*viewport)
         } else {
             *viewport
         };
 
+        let status = self.status.unwrap_or(Status::Disabled);
+        let style = theme.style(&self.class, status);
+
+        self.visual
+            .draw_lowlight(renderer, &layout, &viewport, &self.padding, &style);
+
+        let child_render_style = match VisualStyle::text_color(&style) {
+            Some(text_color) => renderer::Style { text_color },
+            None => *render_style,
+        };
+
+        let content_layout = layout.children().next().unwrap();
         self.content.as_widget().draw(
             &tree.children[0],
             renderer,
             theme,
-            &renderer::Style {
-                text_color: style.text_color,
-            },
+            &child_render_style,
             content_layout,
             cursor,
             &viewport,
         );
+
+        self.visual
+            .draw_highlight(renderer, &layout, &viewport, &self.padding, &style);
     }
 
     fn mouse_interaction(
@@ -404,9 +413,7 @@ where
         _viewport: &Rectangle,
         _renderer: &Renderer,
     ) -> mouse::Interaction {
-        let is_mouse_over = cursor.is_over(layout.bounds());
-
-        if is_mouse_over && self.on_press.is_some() {
+        if self.on_press.is_some() && self.visual.hit_test(layout, &self.padding, cursor) {
             mouse::Interaction::Pointer
         } else {
             mouse::Interaction::default()
@@ -431,24 +438,27 @@ where
     }
 }
 
-impl<'a, Message, Theme, Renderer> From<FancyButton<'a, Message, Theme, Renderer>>
+impl<'a, Message, Theme, Renderer, ActiveVisual>
+    From<FancyButton<'a, Message, Theme, Renderer, ActiveVisual>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + 'a,
-    Renderer: iced::advanced::Renderer + 'a,
+    ActiveVisual: Visual<Renderer> + 'a,
+    ActiveVisual::Style: VisualStyle + 'a,
+    Theme: Catalog<ActiveVisual::Style> + 'a,
+    Renderer: advanced::renderer::Renderer + 'a,
 {
-    fn from(button: FancyButton<'a, Message, Theme, Renderer>) -> Self {
+    fn from(button: FancyButton<'a, Message, Theme, Renderer, ActiveVisual>) -> Self {
         Self::new(button)
     }
 }
 
-/// The default [`Padding`] of a [`FancyButton`].
-pub const DEFAULT_PADDING: Padding = Padding {
-    top: 5.0,
-    bottom: 5.0,
-    right: 10.0,
-    left: 10.0,
+/// The default [`Padding`] of a [`Button`].
+pub const DEFAULT_CONTENT_PADDING: Padding = Padding {
+    top: 3.0,
+    bottom: 3.0,
+    right: 8.0,
+    left: 8.0,
 };
 
 /// The possible status of a [`FancyButton`].
@@ -462,270 +472,4 @@ pub enum Status {
     Pressed,
     /// The [`FancyButton`] cannot be pressed.
     Disabled,
-}
-
-/// The style of a FancyButton.
-///
-/// If not specified with [`FancyButton::style`]
-/// the theme will provide the style.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Style {
-    /// The [`Background`] of the FancyButton.
-    pub background: Option<Background>,
-    /// The text [`Color`] of the FancyButton.
-    pub text_color: Color,
-    /// The [`Border`] of the FancyButton.
-    pub border: Border,
-    /// The [`Shadow`] of the FancyButton.
-    pub shadow: Shadow,
-    /// Whether the FancyButton should be snapped to the pixel grid.
-    pub snap: bool,
-}
-
-impl Style {
-    /// Updates the [`Style`] with the given [`Background`].
-    pub fn with_background(self, background: impl Into<Background>) -> Self {
-        Self {
-            background: Some(background.into()),
-            ..self
-        }
-    }
-}
-
-impl Default for Style {
-    fn default() -> Self {
-        Self {
-            background: None,
-            text_color: Color::BLACK,
-            border: Border::default(),
-            shadow: Shadow::default(),
-            snap: true,
-        }
-    }
-}
-
-/// The theme catalog of a [`FancyButton`].
-///
-/// All themes that can be used with [`FancyButton`]
-/// must implement this trait.
-///
-/// # Example
-/// ```no_run
-/// # use iced_widget::core::{Color, Background};
-/// # use iced_widget::FancyButton::{Catalog, Status, Style};
-/// # struct MyTheme;
-/// #[derive(Debug, Default)]
-/// pub enum FancyButtonClass {
-///     #[default]
-///     Primary,
-///     Secondary,
-///     Danger
-/// }
-///
-/// impl Catalog for MyTheme {
-///     type Class<'a> = FancyButtonClass;
-///     
-///     fn default<'a>() -> Self::Class<'a> {
-///         FancyButtonClass::default()
-///     }
-///     
-///
-///     fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
-///         let mut style = Style::default();
-///
-///         match class {
-///             FancyButtonClass::Primary => {
-///                 style.background = Some(Background::Color(Color::from_rgb(0.529, 0.808, 0.921)));
-///             },
-///             FancyButtonClass::Secondary => {
-///                 style.background = Some(Background::Color(Color::WHITE));
-///             },
-///             FancyButtonClass::Danger => {
-///                 style.background = Some(Background::Color(Color::from_rgb(0.941, 0.502, 0.502)));
-///             },
-///         }
-///
-///         style
-///     }
-/// }
-/// ```
-///
-/// Although, in order to use [`FancyButton::style`]
-/// with `MyTheme`, [`Catalog::Class`] must implement
-/// `From<StyleFn<'_, MyTheme>>`.
-pub trait Catalog {
-    /// The item class of the [`Catalog`].
-    type Class<'a>;
-
-    /// The default class produced by the [`Catalog`].
-    fn default<'a>() -> Self::Class<'a>;
-
-    /// The [`Style`] of a class with the given status.
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style;
-}
-
-/// A styling function for a [`FancyButton`].
-pub type StyleFn<'a, Theme> = Box<dyn Fn(&Theme, Status) -> Style + 'a>;
-
-impl Catalog for Theme {
-    type Class<'a> = StyleFn<'a, Self>;
-
-    fn default<'a>() -> Self::Class<'a> {
-        Box::new(primary)
-    }
-
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
-        class(self, status)
-    }
-}
-
-/// A primary FancyButton; denoting a main action.
-pub fn primary(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.primary.base);
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.primary.strong.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A secondary FancyButton; denoting a complementary action.
-pub fn secondary(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.secondary.base);
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.secondary.strong.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A success FancyButton; denoting a good outcome.
-pub fn success(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.success.base);
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.success.strong.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A warning FancyButton; denoting a risky action.
-pub fn warning(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.warning.base);
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.warning.strong.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A danger FancyButton; denoting a destructive action.
-pub fn danger(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.danger.base);
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.danger.strong.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A text FancyButton; useful for links.
-pub fn text(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-
-    let base = Style {
-        text_color: palette.background.base.text,
-        ..Style::default()
-    };
-
-    match status {
-        Status::Active | Status::Pressed => base,
-        Status::Hovered => Style {
-            text_color: palette.background.base.text.scale_alpha(0.8),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A FancyButton using background shades.
-pub fn background(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.background.base);
-
-    match status {
-        Status::Active => base,
-        Status::Pressed => Style {
-            background: Some(Background::Color(palette.background.strong.color)),
-            ..base
-        },
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.background.weak.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-/// A subtle FancyButton using weak background shades.
-pub fn subtle(theme: &Theme, status: Status) -> Style {
-    let palette = theme.extended_palette();
-    let base = styled(palette.background.weakest);
-
-    match status {
-        Status::Active => base,
-        Status::Pressed => Style {
-            background: Some(Background::Color(palette.background.strong.color)),
-            ..base
-        },
-        Status::Hovered => Style {
-            background: Some(Background::Color(palette.background.weaker.color)),
-            ..base
-        },
-        Status::Disabled => disabled(base),
-    }
-}
-
-fn styled(pair: palette::Pair) -> Style {
-    Style {
-        background: Some(Background::Color(pair.color)),
-        text_color: pair.text,
-        border: border::rounded(2),
-        ..Style::default()
-    }
-}
-
-fn disabled(style: Style) -> Style {
-    Style {
-        background: style
-            .background
-            .map(|background| background.scale_alpha(0.5)),
-        text_color: style.text_color.scale_alpha(0.5),
-        ..style
-    }
 }
