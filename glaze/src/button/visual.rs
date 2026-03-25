@@ -18,8 +18,8 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 /// ```no_run
 /// # use iced::{Color, Background};
 /// # use glaze::button::{Status};
-/// # use glaze::visual::{Catalog};
-/// # use glaze::standard::{Style};
+/// # use glaze::button::visual::{Catalog};
+/// # use glaze::button::standard::{Style};
 /// # struct MyTheme;
 /// #[derive(Debug, Default)]
 /// pub enum ButtonClass {
@@ -88,7 +88,7 @@ pub trait VisualStyle {
 /// `visual_size` is added to the `padding`` of [`glaze::Button`] to determine how big the button
 /// actually is. The visual_size returned by the [`Visual`] should be sufficient to contain
 /// all the rendering done by the [`Visual`].
-pub trait Visual<Renderer> {
+pub trait ButtonVisual<Renderer> {
     /// The style type that relates to this Visual
     type Style;
 

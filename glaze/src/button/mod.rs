@@ -30,7 +30,7 @@ use iced_plus::PaddingExtensions;
 pub mod standard;
 pub mod visual;
 
-use visual::{Catalog, StyleFn, Visual, VisualStyle};
+use visual::{Catalog, StyleFn, ButtonVisual, VisualStyle};
 
 /// A generic widget that produces a message when pressed.
 ///
@@ -72,9 +72,9 @@ pub struct GlazedButton<
     Message,
     Theme = crate::Theme,
     Renderer = crate::Renderer,
-    ActiveVisual = standard::ButtonVisual,
+    ActiveVisual = standard::Visual,
 > where
-    ActiveVisual: Visual<Renderer>,
+    ActiveVisual: ButtonVisual<Renderer>,
     ActiveVisual::Style: VisualStyle,
     Renderer: advanced::renderer::Renderer,
     Theme: Catalog<ActiveVisual::Style>,
@@ -108,7 +108,7 @@ impl<'a, Message, Theme, Renderer, ActiveVisual>
     GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>
 where
     Renderer: advanced::renderer::Renderer,
-    ActiveVisual: Visual<Renderer>,
+    ActiveVisual: ButtonVisual<Renderer>,
     Theme: Catalog<ActiveVisual::Style>,
     ActiveVisual::Style: VisualStyle,
 {
@@ -217,7 +217,7 @@ impl<'a, Message, Theme, Renderer, ActiveVisual> Widget<Message, Theme, Renderer
 where
     Message: 'a + Clone,
     Renderer: 'a + advanced::renderer::Renderer,
-    ActiveVisual: Visual<Renderer>,
+    ActiveVisual: ButtonVisual<Renderer>,
     ActiveVisual::Style: VisualStyle,
     Theme: Catalog<ActiveVisual::Style>,
 {
@@ -443,7 +443,7 @@ impl<'a, Message, Theme, Renderer, ActiveVisual>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    ActiveVisual: Visual<Renderer> + 'a,
+    ActiveVisual: ButtonVisual<Renderer> + 'a,
     ActiveVisual::Style: VisualStyle + 'a,
     Theme: Catalog<ActiveVisual::Style> + 'a,
     Renderer: advanced::renderer::Renderer + 'a,

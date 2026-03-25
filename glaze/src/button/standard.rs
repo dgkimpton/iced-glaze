@@ -7,15 +7,15 @@ use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
 
 use crate::button::{
     Status,
-    visual::{Catalog, StyleFn, Visual, VisualStyle},
+    visual::{Catalog, StyleFn, ButtonVisual, VisualStyle},
 };
 
 /// Type used to hook the Visual Rendering of the [`glaze::Button`] class
 /// to provide background rendering for interactivity
 #[derive(Default)]
-pub struct ButtonVisual {}
+pub struct Visual {}
 
-impl<Renderer> Visual<Renderer> for ButtonVisual
+impl<Renderer> ButtonVisual<Renderer> for Visual
 where
     Renderer: advanced::renderer::Renderer,
 {
