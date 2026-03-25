@@ -27,7 +27,10 @@ use iced::window;
 use iced::{Element, Event, Length, Padding, Rectangle, Size, Vector};
 use iced_plus::PaddingExtensions;
 
-use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
+pub mod standard;
+pub mod visual;
+
+use visual::{Catalog, StyleFn, Visual, VisualStyle};
 
 /// A generic widget that produces a message when pressed.
 ///
@@ -69,7 +72,7 @@ pub struct GlazedButton<
     Message,
     Theme = crate::Theme,
     Renderer = crate::Renderer,
-    ActiveVisual = super::standard::ButtonVisual,
+    ActiveVisual = standard::ButtonVisual,
 > where
     ActiveVisual: Visual<Renderer>,
     ActiveVisual::Style: VisualStyle,

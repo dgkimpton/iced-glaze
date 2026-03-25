@@ -5,8 +5,10 @@ use iced::border::{self, Border};
 use iced::theme::palette;
 use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
 
-use super::button::Status;
-use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
+use crate::button::{
+    Status,
+    visual::{Catalog, StyleFn, Visual, VisualStyle},
+};
 
 /// Type used to hook the Visual Rendering of the [`glaze::Button`] class
 /// to provide background rendering for interactivity

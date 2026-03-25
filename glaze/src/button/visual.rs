@@ -3,7 +3,7 @@
 use iced::advanced::{Layout, mouse};
 use iced::{Color, Padding, Rectangle};
 
-use super::button::Status;
+use crate::button::Status;
 
 /// A styling function for a [`Button`].
 pub type StyleFn<'a, Theme, ActiveVisualStyle> =
