@@ -16,12 +16,14 @@ impl Glazed {
     fn view(&self) -> Element<'_, Message> {
         widget::column![
             widget::text("Widget explorer application for the iced-glaze widgets"),
+            surround(glaze::button("A button").on_press(Message::Clicked).into()),
+            surround(glaze::button("disabled button").into()),
             surround(
-                glaze::button("A button")
+                glaze::lozenge_button("lozenge button")
                     .on_press(Message::Clicked)
                     .into()
             ),
-            surround(glaze::button("disabled button").into()),
+            surround(glaze::lozenge_button("disabled lozenge button").into()),
         ]
         .into()
     }

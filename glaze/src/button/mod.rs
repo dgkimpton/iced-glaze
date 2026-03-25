@@ -28,6 +28,7 @@ use iced::{Element, Event, Length, Padding, Rectangle, Size, Vector};
 use iced_plus::PaddingExtensions;
 
 pub mod standard;
+pub mod lozenge;
 pub mod visual;
 
 use visual::{Catalog, StyleFn, ButtonVisual, VisualStyle};
@@ -254,7 +255,7 @@ where
             limits,
             self.width,
             self.height,
-            self.padding.expand(ActiveVisual::VISUAL_SIZE),
+            self.padding.expand(self.visual.visual_size()),
             |limits| {
                 self.content
                     .as_widget_mut()

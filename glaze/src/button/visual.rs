@@ -94,7 +94,7 @@ pub trait ButtonVisual<Renderer> {
 
     /// Extra space that provides room to render the Visual, e.g. space for borders,
     /// drop shadows, etc.
-    const VISUAL_SIZE: Padding;
+    fn visual_size(&self) -> Padding;
 
     /// Test if the cursor location is considerd clickable for this Visual
     fn hit_test(&self, layout: Layout<'_>, padding: &Padding, cursor: mouse::Cursor) -> bool;

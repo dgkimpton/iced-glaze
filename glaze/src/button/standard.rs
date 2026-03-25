@@ -7,7 +7,7 @@ use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
 
 use crate::button::{
     Status,
-    visual::{Catalog, StyleFn, ButtonVisual, VisualStyle},
+    visual::{ButtonVisual, Catalog, StyleFn, VisualStyle},
 };
 
 /// Type used to hook the Visual Rendering of the [`glaze::Button`] class
@@ -21,12 +21,14 @@ where
 {
     type Style = Style;
 
-    const VISUAL_SIZE: Padding = Padding {
-        top: 2.0,
-        bottom: 2.0,
-        right: 2.0,
-        left: 2.0,
-    };
+    fn visual_size(&self) -> Padding {
+        Padding {
+            top: 2.0,
+            bottom: 2.0,
+            right: 2.0,
+            left: 2.0,
+        }
+    }
 
     fn hit_test(&self, layout: Layout<'_>, _padding: &Padding, cursor: mouse::Cursor) -> bool {
         cursor.is_over(layout.bounds())
