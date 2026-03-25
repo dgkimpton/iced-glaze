@@ -8,7 +8,7 @@ use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
 use super::button::Status;
 use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 
-/// Type used to hook the Visual Rendering of the [`fancybutton::Button`] class
+/// Type used to hook the Visual Rendering of the [`glaze::Button`] class
 /// to provide background rendering for interactivity
 #[derive(Default)]
 pub struct ButtonVisual {}

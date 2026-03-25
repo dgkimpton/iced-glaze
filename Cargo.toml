@@ -1,13 +1,13 @@
 
 [workspace]
 resolver = "2"
-members=["fancybutton","glazed", "iced_plus"]
+members=["glaze","glazed", "iced_plus"]
 default-members=["glazed"]
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)'] }
 
 [workspace.dependencies]
-fancybutton = { path = "./fancybutton" }
+glaze = { path = "./glaze" }
 iced_plus = { path = "./iced_plus" }
 iced = { version = "0.14", features = ["advanced"]}

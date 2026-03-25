@@ -1,4 +1,4 @@
-//! Visual styling framework for the fancybutton
+//! Visual styling framework for the glaze
 //!
 use iced::advanced::{Layout, mouse};
 use iced::{Color, Padding, Rectangle};
@@ -17,9 +17,9 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 /// # Example
 /// ```no_run
 /// # use iced::{Color, Background};
-/// # use fancybutton::button::{Status};
-/// # use fancybutton::visual::{Catalog};
-/// # use fancybutton::standard::{Style};
+/// # use glaze::button::{Status};
+/// # use glaze::visual::{Catalog};
+/// # use glaze::standard::{Style};
 /// # struct MyTheme;
 /// #[derive(Debug, Default)]
 /// pub enum ButtonClass {
@@ -74,9 +74,9 @@ where
     fn style(&self, class: &Self::Class<'_>, status: Status) -> ActiveVisualStyle;
 }
 
-/// Base trait for the [`VisualStyle`] of [`fancybutton::Button`]'s.
+/// Base trait for the [`VisualStyle`] of [`glaze::Button`]'s.
 pub trait VisualStyle {
-    /// The text color that will be inherited by the [`content`] of the [`fancybutton::Button`].
+    /// The text color that will be inherited by the [`content`] of the [`glaze::Button`].
     /// If None then forwards the parent text_color
     fn text_color(&self) -> Option<Color> {
         None
@@ -85,7 +85,7 @@ pub trait VisualStyle {
 
 /// Trait that should be implemented to define the actual rendering of [`VisualStyle`]'s.
 /// Lowlights are drawn below the `content` and highlights are drawn above the `content`.
-/// `visual_size` is added to the `padding`` of [`fancybutton::Button`] to determine how big the button
+/// `visual_size` is added to the `padding`` of [`glaze::Button`] to determine how big the button
 /// actually is. The visual_size returned by the [`Visual`] should be sufficient to contain
 /// all the rendering done by the [`Visual`].
 pub trait Visual<Renderer> {

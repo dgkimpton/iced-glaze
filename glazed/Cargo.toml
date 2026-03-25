@@ -8,7 +8,7 @@ advanced = ["iced/advanced"]
 
 [dependencies]
 iced.workspace = true
-fancybutton.workspace = true
+glaze.workspace = true
 
 [lints]
 workspace = true

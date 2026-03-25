@@ -1,10 +1,10 @@
-//! FancyButtons allow your users to perform actions by pressing them.
+//! GlazedButtons allow your users to perform actions by pressing them.
 //!
 //! # Example
 //! ```no_run
 //! # pub type State = ();
 //! # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
-//! use crate::fancybutton::button;
+//! use crate::glaze::button;
 //!
 //! #[derive(Clone)]
 //! enum Message {
@@ -35,7 +35,7 @@ use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 /// ```no_run
 /// # pub type State = ();
 /// # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
-/// use fancybutton::button;
+/// use glaze::button;
 ///
 /// #[derive(Clone)]
 /// enum Message {
@@ -47,13 +47,13 @@ use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 /// }
 /// ```
 ///
-/// If a [`FancyButton::on_press`] handler is not set, the resulting [`FancyButton`] will
+/// If a [`GlazedButton::on_press`] handler is not set, the resulting [`GlazedButton`] will
 /// be disabled:
 ///
 /// ```no_run
 /// # pub type State = ();
 /// # pub type Element<'a, Message> = iced::Element<'a, Message, iced::Theme, iced::Renderer>;
-/// use fancybutton::button;
+/// use glaze::button;
 ///
 /// #[derive(Clone)]
 /// enum Message {
@@ -64,7 +64,7 @@ use super::visual::{Catalog, StyleFn, Visual, VisualStyle};
 ///     button("I am disabled!").into()
 /// }
 /// ```
-pub struct FancyButton<
+pub struct GlazedButton<
     'a,
     Message,
     Theme = crate::Theme,
@@ -102,7 +102,7 @@ impl<Message: Clone> OnPress<'_, Message> {
 }
 
 impl<'a, Message, Theme, Renderer, ActiveVisual>
-    FancyButton<'a, Message, Theme, Renderer, ActiveVisual>
+    GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>
 where
     Renderer: advanced::renderer::Renderer,
     ActiveVisual: Visual<Renderer>,
@@ -117,7 +117,7 @@ where
         let content = content.into();
         let size = content.as_widget().size_hint();
 
-        FancyButton {
+        Self {
             visual,
             content,
             on_press: None,
@@ -130,38 +130,38 @@ where
         }
     }
 
-    /// Sets the width of the [`FancyButton`].
+    /// Sets the width of the [`GlazedButton`].
     pub fn width(mut self, width: impl Into<Length>) -> Self {
         self.width = width.into();
         self
     }
 
-    /// Sets the height of the [`FancyButton`].
+    /// Sets the height of the [`GlazedButton`].
     pub fn height(mut self, height: impl Into<Length>) -> Self {
         self.height = height.into();
         self
     }
 
-    /// Sets the [`Padding`] of the [`FancyButton`].
+    /// Sets the [`Padding`] of the [`GlazedButton`].
     pub fn padding<P: Into<Padding>>(mut self, padding: P) -> Self {
         self.padding = padding.into();
         self
     }
 
-    /// Sets the message that will be produced when the [`FancyButton`] is pressed.
+    /// Sets the message that will be produced when the [`GlazedButton`] is pressed.
     ///
-    /// Unless `on_press` is called, the [`FancyButton`] will be disabled.
+    /// Unless `on_press` is called, the [`GlazedButton`] will be disabled.
     pub fn on_press(mut self, on_press: Message) -> Self {
         self.on_press = Some(OnPress::Direct(on_press));
         self
     }
 
-    /// Sets the message that will be produced when the [`FancyButton`] is pressed.
+    /// Sets the message that will be produced when the [`GlazedButton`] is pressed.
     ///
-    /// This is analogous to [`FancyButton::on_press`], but using a closure to produce
+    /// This is analogous to [`GlazedButton::on_press`], but using a closure to produce
     /// the message.
     ///
-    /// This closure will only be called when the [`FancyButton`] is actually pressed and,
+    /// This closure will only be called when the [`GlazedButton`] is actually pressed and,
     /// therefore, this method is useful to reduce overhead if creating the resulting
     /// message is slow.
     pub fn on_press_with(mut self, on_press: impl Fn() -> Message + 'a) -> Self {
@@ -169,16 +169,16 @@ where
         self
     }
 
-    /// Sets the message that will be produced when the [`FancyButton`] is pressed,
+    /// Sets the message that will be produced when the [`GlazedButton`] is pressed,
     /// if `Some`.
     ///
-    /// If `None`, the [`FancyButton`] will be disabled.
+    /// If `None`, the [`GlazedButton`] will be disabled.
     pub fn on_press_maybe(mut self, on_press: Option<Message>) -> Self {
         self.on_press = on_press.map(OnPress::Direct);
         self
     }
 
-    /// Sets whether the contents of the [`FancyButton`] should be clipped on
+    /// Sets whether the contents of the [`GlazedButton`] should be clipped on
     /// overflow.
     pub fn clip(mut self, clip: bool) -> Self {
         self.clip = clip;
@@ -210,7 +210,7 @@ struct State {
 }
 
 impl<'a, Message, Theme, Renderer, ActiveVisual> Widget<Message, Theme, Renderer>
-    for FancyButton<'a, Message, Theme, Renderer, ActiveVisual>
+    for GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>
 where
     Message: 'a + Clone,
     Renderer: 'a + advanced::renderer::Renderer,
@@ -436,7 +436,7 @@ where
 }
 
 impl<'a, Message, Theme, Renderer, ActiveVisual>
-    From<FancyButton<'a, Message, Theme, Renderer, ActiveVisual>>
+    From<GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
@@ -445,7 +445,7 @@ where
     Theme: Catalog<ActiveVisual::Style> + 'a,
     Renderer: advanced::renderer::Renderer + 'a,
 {
-    fn from(button: FancyButton<'a, Message, Theme, Renderer, ActiveVisual>) -> Self {
+    fn from(button: GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>) -> Self {
         Self::new(button)
     }
 }
@@ -458,15 +458,15 @@ pub const DEFAULT_CONTENT_PADDING: Padding = Padding {
     left: 8.0,
 };
 
-/// The possible status of a [`FancyButton`].
+/// The possible status of a [`GlazedButton`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Status {
-    /// The [`FancyButton`] can be pressed.
+    /// The [`GlazedButton`] can be pressed.
     Active,
-    /// The [`FancyButton`] can be pressed and it is being hovered.
+    /// The [`GlazedButton`] can be pressed and it is being hovered.
     Hovered,
-    /// The [`FancyButton`] is being pressed.
+    /// The [`GlazedButton`] is being pressed.
     Pressed,
-    /// The [`FancyButton`] cannot be pressed.
+    /// The [`GlazedButton`] cannot be pressed.
     Disabled,
 }

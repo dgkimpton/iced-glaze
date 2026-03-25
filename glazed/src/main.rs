@@ -17,11 +17,11 @@ impl Glazed {
         widget::column![
             widget::text("Widget explorer application for the iced-glaze widgets"),
             surround(
-                fancybutton::button("A button")
+                glaze::button("A button")
                     .on_press(Message::Clicked)
                     .into()
             ),
-            surround(fancybutton::button("disabled button").into()),
+            surround(glaze::button("disabled button").into()),
         ]
         .into()
     }

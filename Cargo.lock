@@ -763,14 +763,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fancybutton"
-version = "0.1.0"
-dependencies = [
- "iced",
- "iced_plus",
-]
-
-[[package]]
 name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1007,10 +999,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
 
 [[package]]
+name = "glaze"
+version = "0.1.0"
+dependencies = [
+ "iced",
+ "iced_plus",
+]
+
+[[package]]
 name = "glazed"
 version = "0.1.0"
 dependencies = [
- "fancybutton",
+ "glaze",
  "iced",
 ]
 
