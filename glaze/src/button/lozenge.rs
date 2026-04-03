@@ -46,10 +46,12 @@ where
         Renderer: advanced::renderer::Renderer,
     {
         match style.color {
-            Background::Color(color) => if color.a == 0f32 {
-                return;
-            },
-            _=>{}
+            Background::Color(color) => {
+                if color.a == 0f32 {
+                    return;
+                }
+            }
+            _ => {}
         }
 
         let bounds = layout.bounds();
@@ -103,34 +105,6 @@ pub struct Style {
     pub snap: bool,
 }
 
-// impl Style {
-//     /// Updates the [`Style`] with the given color implemented as a [`Background`].
-//     pub fn with_color(self, color: impl Into<Background>) -> Self {
-//         Self {
-//             color: Some(color.into()),
-//             ..self
-//         }
-//     }
-//     /// Updates the [`Style`] with the given text_color implemented as a [`Color`].
-//     pub fn with_text_color(self, color: impl Into<Color>) -> Self {
-//         Self {
-//             text_color: Some(color.into()),
-//             ..self
-//         }
-//     }
-// }
-
-// impl Default for Style {
-//     fn default() -> Self {
-//         Self {
-//             color: Background::Color(Color::TRANSPARENT),
-//             text_color: Color::BLACK,
-//             is_expanded: false,
-//             snap: true,
-//         }
-//     }
-// }
-
 impl VisualStyle for Style {
     fn text_color(&self) -> Color {
         self.text_color
@@ -169,10 +143,18 @@ fn disabled(_palette: &palette::Extended, inherited: &renderer::Style) -> Style 
     }
 }
 
-fn hovered(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
-    let pair = palette.primary.weak;
+fn active(_palette: &palette::Extended, inherited: &renderer::Style) -> Style {
     Style {
-        color: Background::Color(pair.color),
+        color: Background::Color(Color::TRANSPARENT),
+        text_color: inherited.text_color,
+        is_expanded: false,
+        snap: true,
+    }
+}
+
+fn hovered(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
+    Style {
+        color: Background::Color(palette.primary.weak.color),
         text_color: inherited.text_color,
         is_expanded: true,
         snap: true,
@@ -180,19 +162,8 @@ fn hovered(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
 }
 
 fn pressed(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
-    let pair = palette.primary.strong;
     Style {
-        color: Background::Color(pair.color),
-        text_color: inherited.text_color,
-        is_expanded: false,
-        snap: true,
-    }
-}
-
-fn active(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
-    let pair = palette.primary.base;
-    Style {
-        color: Background::Color(pair.color),
+        color: Background::Color(palette.primary.strong.color),
         text_color: inherited.text_color,
         is_expanded: false,
         snap: true,
