@@ -2,7 +2,7 @@ use iced::{widget::Container, *};
 
 fn main() -> Result {
     application(Glazed::default, Glazed::update, Glazed::view)
-        .theme(Theme::Dracula)
+        .theme(Theme::SolarizedLight)
         .run()
 }
 
