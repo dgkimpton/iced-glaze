@@ -1,7 +1,9 @@
 use iced::{widget::Container, *};
 
 fn main() -> Result {
-    iced::run(Glazed::update, Glazed::view)
+    application(Glazed::default, Glazed::update, Glazed::view)
+        .theme(Theme::Dracula)
+        .run()
 }
 
 #[derive(Default)]
@@ -14,16 +16,26 @@ enum Message {
 
 impl Glazed {
     fn view(&self) -> Element<'_, Message> {
-        widget::column![
-            widget::text("Widget explorer application for the iced-glaze widgets"),
-            surround(glaze::button("A button").on_press(Message::Clicked).into()),
-            surround(glaze::button("disabled button").into()),
-            surround(
-                glaze::lozenge_button("lozenge button")
-                    .on_press(Message::Clicked)
-                    .into()
-            ),
-            surround(glaze::lozenge_button("disabled lozenge button").into()),
+        widget::row![
+            widget::column![
+                widget::text("Widget explorer application for the iced-glaze widgets"),
+                surround(glaze::button("A button").on_press(Message::Clicked).into()),
+                surround(glaze::button("disabled button").into()),
+                surround(
+                    glaze::lozenge_button("lozenge button")
+                        .on_press(Message::Clicked)
+                        .into()
+                ),
+                surround(glaze::lozenge_button("disabled lozenge button").into()),
+            ],
+            widget::column![
+                widget::text(""),
+                iced::widget::button("test"),
+                glaze::button("A button").on_press(Message::Clicked),
+                glaze::button("disabled button"),
+                glaze::lozenge_button("lozenge button").on_press(Message::Clicked),
+                glaze::lozenge_button("disabled lozenge button"),
+            ]
         ]
         .into()
     }

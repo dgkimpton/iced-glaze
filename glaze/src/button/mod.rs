@@ -27,11 +27,11 @@ use iced::window;
 use iced::{Element, Event, Length, Padding, Rectangle, Size, Vector};
 use iced_plus::PaddingExtensions;
 
-pub mod standard;
 pub mod lozenge;
+pub mod standard;
 pub mod visual;
 
-use visual::{Catalog, StyleFn, ButtonVisual, VisualStyle};
+use visual::{ButtonVisual, Catalog, StyleFn, VisualStyle};
 
 /// A generic widget that produces a message when pressed.
 ///
@@ -191,7 +191,10 @@ where
 
     /// Sets the style of the [`Button`].
     #[must_use]
-    pub fn style(mut self, style: impl Fn(&Theme, Status) -> ActiveVisual::Style + 'a) -> Self
+    pub fn style(
+        mut self,
+        style: impl Fn(&Theme, Status, &renderer::Style) -> ActiveVisual::Style + 'a,
+    ) -> Self
     where
         Theme::Class<'a>: From<StyleFn<'a, Theme, ActiveVisual::Style>>,
     {
@@ -381,14 +384,13 @@ where
         };
 
         let status = self.status.unwrap_or(Status::Disabled);
-        let style = theme.style(&self.class, status);
+        let style = theme.style(&self.class, status, render_style);
 
         self.visual
             .draw_lowlight(renderer, &layout, &viewport, &self.padding, &style);
 
-        let child_render_style = match VisualStyle::text_color(&style) {
-            Some(text_color) => renderer::Style { text_color },
-            None => *render_style,
+        let child_render_style = renderer::Style {
+            text_color: VisualStyle::text_color(&style),
         };
 
         let content_layout = layout.children().next().unwrap();

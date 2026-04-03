@@ -103,8 +103,8 @@ impl Default for Style {
 }
 
 impl VisualStyle for Style {
-    fn text_color(&self) -> Option<Color> {
-        Some(self.text_color)
+    fn text_color(&self) -> Color {
+        self.text_color
     }
 }
 
@@ -115,13 +115,13 @@ impl Catalog<Style> for Theme {
         Box::new(primary)
     }
 
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
-        class(self, status)
+    fn style(&self, class: &Self::Class<'_>, status: Status, inherited: &renderer::Style) -> Style {
+        class(self, status, inherited)
     }
 }
 
 /// A primary button; denoting a main action.
-pub fn primary(theme: &Theme, status: Status) -> Style {
+pub fn primary(theme: &Theme, status: Status, _inherited: &renderer::Style) -> Style {
     let palette = theme.extended_palette();
     let base = styled(palette.primary.base);
 

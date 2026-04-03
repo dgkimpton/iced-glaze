@@ -1,13 +1,13 @@
 //! Visual styling framework for the glaze
 //!
-use iced::advanced::{Layout, mouse};
+use iced::advanced::{Layout, mouse, renderer};
 use iced::{Color, Padding, Rectangle};
 
 use crate::button::Status;
 
 /// A styling function for a [`Button`].
 pub type StyleFn<'a, Theme, ActiveVisualStyle> =
-    Box<dyn Fn(&Theme, Status) -> ActiveVisualStyle + 'a>;
+    Box<dyn Fn(&Theme, Status, &renderer::Style) -> ActiveVisualStyle + 'a>;
 
 /// The theme catalog of a [`Button`].
 ///
@@ -37,7 +37,7 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 ///     }
 ///     
 ///
-///     fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
+///     fn style(&self, class: &Self::Class<'_>, status: Status, _inherited: &renderer::Style) -> Style {
 ///         let mut style = Style::default();
 ///
 ///         match class {
@@ -71,16 +71,18 @@ where
     fn default<'a>() -> Self::Class<'a>;
 
     /// The [`Style`] of a class with the given status.
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> ActiveVisualStyle;
+    fn style(
+        &self,
+        class: &Self::Class<'_>,
+        status: Status,
+        inherited: &renderer::Style,
+    ) -> ActiveVisualStyle;
 }
 
 /// Base trait for the [`VisualStyle`] of [`glaze::Button`]'s.
 pub trait VisualStyle {
-    /// The text color that will be inherited by the [`content`] of the [`glaze::Button`].
-    /// If None then forwards the parent text_color
-    fn text_color(&self) -> Option<Color> {
-        None
-    }
+    /// The text color that will be inherited by the [`content`] of the [`glaze::Button`]
+    fn text_color(&self) -> Color;
 }
 
 /// Trait that should be implemented to define the actual rendering of [`VisualStyle`]'s.
