@@ -12,7 +12,7 @@
 //! }
 //!
 //! fn view(state: &State) -> Element<'_, Message> {
-//!     button("Press me!").on_press(Message::ButtonPressed).into()
+//!     button("Press me!").on_press().send(Message::ButtonPressed).into()
 //! }
 //! ```
 use iced::advanced::{
@@ -47,7 +47,7 @@ use visual::{ButtonVisual, Catalog, StyleFn, VisualStyle};
 /// }
 ///
 /// fn view(state: &State) -> Element<'_, Message> {
-///     button("Press me!").on_press(Message::ButtonPressed).into()
+///     button("Press me!").on_press().send(Message::ButtonPressed).into()
 /// }
 /// ```
 ///

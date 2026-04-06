@@ -16,7 +16,7 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 ///
 /// # Example
 /// ```no_run
-/// # use iced::{Color, Background};
+/// # use iced::{Color, Background, advanced::renderer};
 /// # use glaze::button::{Status};
 /// # use glaze::button::visual::{Catalog};
 /// # use glaze::button::standard::{Style};
