@@ -33,8 +33,18 @@ mod test {
 
     #[test]
     pub fn expanding_is_independent() {
-        let input = Padding{ top: 1f32, right: 2f32, bottom: 3f32, left: 4f32 };
-        let extra = Padding{ top: 10f32, right: 20f32, bottom: 30f32, left: 40f32 };
+        let input = Padding {
+            top: 1f32,
+            right: 2f32,
+            bottom: 3f32,
+            left: 4f32,
+        };
+        let extra = Padding {
+            top: 10f32,
+            right: 20f32,
+            bottom: 30f32,
+            left: 40f32,
+        };
         let result = input.expand(extra);
         assert_eq!(11f32, result.top);
         assert_eq!(22f32, result.right);
@@ -44,8 +54,18 @@ mod test {
 
     #[test]
     pub fn shrinking_is_independent() {
-        let input = Padding{ top: 12f32, right: 24f32, bottom: 36f32, left: 48f32 };
-        let reduction = Padding{ top: 1f32, right: 2f32, bottom: 3f32, left: 4f32 };
+        let input = Padding {
+            top: 12f32,
+            right: 24f32,
+            bottom: 36f32,
+            left: 48f32,
+        };
+        let reduction = Padding {
+            top: 1f32,
+            right: 2f32,
+            bottom: 3f32,
+            left: 4f32,
+        };
         let result = input.shrink(reduction);
         assert_eq!(11f32, result.top);
         assert_eq!(22f32, result.right);
@@ -55,8 +75,18 @@ mod test {
 
     #[test]
     pub fn shrinking_doesnt_go_below_zero() {
-        let input = Padding{ top: 1f32, right: 2f32, bottom: 3f32, left: 4f32 };
-        let reduction = Padding{ top: 12f32, right: 24f32, bottom: 36f32, left: 48f32 };
+        let input = Padding {
+            top: 1f32,
+            right: 2f32,
+            bottom: 3f32,
+            left: 4f32,
+        };
+        let reduction = Padding {
+            top: 12f32,
+            right: 24f32,
+            bottom: 36f32,
+            left: 48f32,
+        };
         let result = input.shrink(reduction);
         assert_eq!(0f32, result.top);
         assert_eq!(0f32, result.right);

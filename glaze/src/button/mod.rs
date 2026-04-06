@@ -390,7 +390,7 @@ where
             .draw_lowlight(renderer, &layout, &viewport, &self.padding, &style);
 
         let child_render_style = renderer::Style {
-            text_color: VisualStyle::text_color(&style),
+            text_color: style.text_color(),
         };
 
         let content_layout = layout.children().next().unwrap();

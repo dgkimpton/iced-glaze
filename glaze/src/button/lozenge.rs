@@ -154,11 +154,13 @@ fn active(_palette: &palette::Extended, inherited: &renderer::Style) -> Style {
 
 fn hovered(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
     Style {
-        color: Background::Gradient(iced::gradient::Linear::new(iced::Radians(std::f32::consts::PI))
-                    .add_stop(0.0, palette.primary.weak.color)
-                    .add_stop(0.5, palette.primary.strong.color)
-                    .add_stop(1.0, palette.primary.weak.color)
-                    .into()),
+        color: Background::Gradient(
+            iced::gradient::Linear::new(iced::Radians(std::f32::consts::PI))
+                .add_stop(0.0, palette.primary.weak.color)
+                .add_stop(0.5, palette.primary.strong.color)
+                .add_stop(1.0, palette.primary.weak.color)
+                .into(),
+        ),
         text_color: inherited.text_color,
         is_expanded: true,
         snap: true,
@@ -167,11 +169,13 @@ fn hovered(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
 
 fn pressed(palette: &palette::Extended, inherited: &renderer::Style) -> Style {
     Style {
-        color: Background::Gradient(iced::gradient::Linear::new(iced::Radians(1.0))
-                    .add_stop(0.0, palette.primary.weak.color)
-                    .add_stop(0.5, palette.primary.strong.color)
-                    .add_stop(1.0, palette.primary.weak.color)
-                    .into()),
+        color: Background::Gradient(
+            iced::gradient::Linear::new(iced::Radians(1.0))
+                .add_stop(0.0, palette.primary.weak.color)
+                .add_stop(0.5, palette.primary.strong.color)
+                .add_stop(1.0, palette.primary.weak.color)
+                .into(),
+        ),
         text_color: inherited.text_color,
         is_expanded: false,
         snap: true,

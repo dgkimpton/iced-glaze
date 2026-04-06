@@ -7,11 +7,14 @@ fn main() -> Result {
 }
 
 #[derive(Default)]
-struct Glazed {}
+struct Glazed {
+    le_toggle: bool,
+}
 
 #[derive(Clone, Copy)]
 enum Message {
     Clicked,
+    Toggled(bool),
 }
 
 impl Glazed {
@@ -29,12 +32,13 @@ impl Glazed {
                 surround(glaze::lozenge_button("disabled lozenge button").into()),
             ],
             widget::column![
-                widget::text(""),
                 iced::widget::button("test"),
                 glaze::button("A button").on_press(Message::Clicked),
                 glaze::button("disabled button"),
                 glaze::lozenge_button("lozenge button").on_press(Message::Clicked),
                 glaze::lozenge_button("disabled lozenge button"),
+                iced::widget::toggler(self.le_toggle).on_toggle(Message::Toggled),
+                iced::widget::toggler(self.le_toggle),
             ]
         ]
         .into()
@@ -44,6 +48,11 @@ impl Glazed {
         match message {
             Message::Clicked => {
                 println!("Clicked");
+                Task::none()
+            }
+
+            Message::Toggled(state) => {
+                self.le_toggle = state;
                 Task::none()
             }
         }
