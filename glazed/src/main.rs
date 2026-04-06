@@ -9,37 +9,49 @@ fn main() -> Result {
 #[derive(Default)]
 struct Glazed {
     le_toggle: bool,
+    status_string: Option<String>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Message {
     Clicked,
     Toggled(bool),
+    ShowStatus(String),
+    ClearStatus,
 }
 
 impl Glazed {
     fn view(&self) -> Element<'_, Message> {
-        widget::row![
-            widget::column![
-                widget::text("Widget explorer application for the iced-glaze widgets"),
-                surround(glaze::button("A button").on_press(Message::Clicked).into()),
-                surround(glaze::button("disabled button").into()),
-                surround(
-                    glaze::lozenge_button("lozenge button")
+        widget::column![
+            widget::row![
+                widget::column![
+                    widget::text("Widget explorer application for the iced-glaze widgets"),
+                    surround(glaze::button("A button").on_press(Message::Clicked).into()),
+                    surround(glaze::button("disabled button").into()),
+                    surround(
+                        glaze::lozenge_button("lozenge button")
+                            .on_press(Message::Clicked)
+                            .into()
+                    ),
+                    surround(glaze::lozenge_button("disabled lozenge button").into()),
+                ],
+                widget::column![
+                    iced::widget::button("test"),
+                    glaze::button("A button")
                         .on_press(Message::Clicked)
-                        .into()
-                ),
-                surround(glaze::lozenge_button("disabled lozenge button").into()),
+                        .on_hover_enter(Message::ShowStatus("A button".into()))
+                        .on_hover_leave(Message::ClearStatus),
+                    glaze::button("disabled button"),
+                    glaze::lozenge_button("lozenge button").on_press(Message::Clicked),
+                    glaze::lozenge_button("disabled lozenge button"),
+                    iced::widget::toggler(self.le_toggle).on_toggle(Message::Toggled),
+                    iced::widget::toggler(self.le_toggle),
+                ]
             ],
-            widget::column![
-                iced::widget::button("test"),
-                glaze::button("A button").on_press(Message::Clicked),
-                glaze::button("disabled button"),
-                glaze::lozenge_button("lozenge button").on_press(Message::Clicked),
-                glaze::lozenge_button("disabled lozenge button"),
-                iced::widget::toggler(self.le_toggle).on_toggle(Message::Toggled),
-                iced::widget::toggler(self.le_toggle),
-            ]
+            widget::text(format!(
+                "Status: {}",
+                self.status_string.as_ref().unwrap_or(&String::new())
+            ))
         ]
         .into()
     }
@@ -53,6 +65,14 @@ impl Glazed {
 
             Message::Toggled(state) => {
                 self.le_toggle = state;
+                Task::none()
+            }
+            Message::ShowStatus(status) => {
+                self.status_string = Some(status.into());
+                Task::none()
+            }
+            Message::ClearStatus => {
+                self.status_string = None;
                 Task::none()
             }
         }
