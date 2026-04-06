@@ -11,6 +11,50 @@ pub enum EventWithArg<'a, Message, Arg> {
     Closure(Box<dyn Fn(Arg) -> Message + 'a>),
 }
 
+pub struct EventBuilder<'a, EventOwner, Message> {
+    updater: fn(&mut EventOwner, Event<'a, Message>) ,
+    owner: EventOwner,
+}
+
+impl<'a, EventOwner, Message: Clone> EventBuilder<'a, EventOwner, Message> {
+    pub fn new(owner: EventOwner, updater: fn(&mut EventOwner, Event<'a, Message>)) -> Self {
+        Self { owner, updater }
+    }
+
+    /// When the event triggers a clone of this message will be sent
+    pub fn send(mut self, msg: Message) -> EventOwner {
+        (self.updater)(&mut self.owner, Event::direct(msg));
+        self.owner
+    }
+
+    /// When the event triggers this closure will be called to build the message.
+    ///
+    /// Therefore, this method is useful to reduce overhead if creating the resulting
+    /// message is slow.
+    pub fn send_with(mut self, msg_fn: impl Fn() -> Message + 'a) -> EventOwner {
+        (self.updater)(&mut self.owner, Event::closure(msg_fn));
+        self.owner
+    }
+    
+    /// When the event triggers and the parameter is Some a clone of this message will be sent
+    ///
+    /// If the parameter is None the event will be disabled
+    pub fn maybe_send(mut self, msg: Option<Message>) -> EventOwner {
+        (self.updater)(&mut self.owner, Event::maybe_direct(msg));
+        self.owner
+    }
+
+    /// When the event triggers and the paramter is Some this closure will be called to build the message.
+    /// Therefore, this method is useful to reduce overhead if creating the resulting
+    /// message is slow and only sometimes applicable.
+    ///
+    /// If the parameter is None the event will be disabled
+    pub fn maybe_send_with(mut self, msg_fn: Option<impl Fn() -> Message + 'a>) -> EventOwner {
+        (self.updater)(&mut self.owner, Event::maybe_closure(msg_fn));
+        self.owner
+    }
+}
+
 impl<'a, Message: Clone> Event<'a, Message> {
     pub fn direct(msg: Message) -> Self {
         Self::Direct(msg)

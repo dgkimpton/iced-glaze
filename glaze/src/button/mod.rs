@@ -144,61 +144,18 @@ where
 
     /// Sets the message that will be produced when the [`GlazedButton`] is pressed.
     ///
-    /// Unless `on_press` is called, the [`GlazedButton`] will be disabled.
-    pub fn on_press(mut self, on_press: Message) -> Self {
-        self.on_press = events::Event::direct(on_press);
-        self
+    /// If no event handler is hooked up the button is disabled
+    pub fn on_press(self) -> events::EventBuilder<'a, Self, Message> {
+        events::EventBuilder::new(self, |s, e| s.on_press = e)
     }
-
-    /// Sets the message that will be produced when the [`GlazedButton`] is pressed.
-    ///
-    /// This is analogous to [`GlazedButton::on_press`], but using a closure to produce
-    /// the message.
-    ///
-    /// This closure will only be called when the [`GlazedButton`] is actually pressed and,
-    /// therefore, this method is useful to reduce overhead if creating the resulting
-    /// message is slow.
-    pub fn on_press_with(mut self, on_press: impl Fn() -> Message + 'a) -> Self {
-        self.on_press = events::Event::closure(on_press);
-        self
-    }
-
-    /// Sets the message that will be produced when the [`GlazedButton`] is pressed,
-    /// if `Some`.
-    ///
-    /// If `None`, the [`GlazedButton`] will be disabled.
-    pub fn on_press_maybe(mut self, on_press: Option<Message>) -> Self {
-        self.on_press = events::Event::maybe_direct(on_press);
-        self
-    }
-
-    /// Sets the message that will be produced when the [`GlazedButton`] is pressed.
-    ///
-    /// This is analogous to [`GlazedButton::on_press`], but using a closure to produce
-    /// the message if the argument is Some
-    ///
-    /// If the argument is None the button will be disabled
-    ///
-    /// This closure will only be called when the [`GlazedButton`] is actually pressed and,
-    /// therefore, this method is useful to reduce overhead if creating the resulting
-    /// message is slow.
-    pub fn on_press_with_maybe(mut self, on_press: Option<impl Fn() -> Message + 'a>) -> Self {
-        self.on_press = events::Event::maybe_closure(on_press);
-        self
-    }
-
     /// Sets the message that will be produced when the cursor enters the [`GlazedButton`].
-    /// The argument will be set to true when the cursor enteres, and false when it leaves
-    pub fn on_hover_enter(mut self, on_hover: Message) -> Self {
-        self.on_hover_enter = events::Event::direct(on_hover);
-        self
+    pub fn on_hover_enter(self) -> events::EventBuilder<'a, Self, Message> {
+        events::EventBuilder::new(self, |s, e| s.on_hover_enter = e)
     }
 
     /// Sets the message that will be produced when the cursor leaves the [`GlazedButton`].
-    /// The argument will be set to true when the cursor enteres, and false when it leaves
-    pub fn on_hover_leave(mut self, on_hover: Message) -> Self {
-        self.on_hover_leave = events::Event::direct(on_hover);
-        self
+    pub fn on_hover_leave(self) -> events::EventBuilder<'a, Self, Message> {
+        events::EventBuilder::new(self, |s, e| s.on_hover_leave = e)
     }
 
     /// Sets whether the contents of the [`GlazedButton`] should be clipped on
