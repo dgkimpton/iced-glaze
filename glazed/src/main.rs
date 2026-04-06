@@ -26,11 +26,7 @@ impl Glazed {
             widget::row![
                 widget::column![
                     widget::text("Widget explorer application for the iced-glaze widgets"),
-                    surround(
-                        glaze::button("A button")
-                            .on_press()
-                            .send(Message::Clicked)
-                    ),
+                    surround(glaze::button("A button").on_press().send(Message::Clicked)),
                     surround(glaze::button("disabled button")),
                     surround(
                         glaze::lozenge_button("lozenge button")
@@ -44,14 +40,16 @@ impl Glazed {
                     glaze::button("A button")
                         .on_press()
                         .send(Message::Clicked)
-                        .on_hover_enter()
-                        .send(Message::ShowStatus(String::from("A button")))
-                        .on_hover_leave()
-                        .send(Message::ClearStatus),
+                        .on_hover()
+                        .send_apart(
+                            Message::ShowStatus(String::from("A button")),
+                            Message::ClearStatus
+                        ),
                     glaze::button("disabled button"),
                     glaze::lozenge_button("lozenge button")
                         .on_press()
-                        .send(Message::Clicked),
+                        .send(Message::Clicked)
+                        .on_hover().send_with(|b| Message::ShowStatus(format!("Lozenge Button Hovered {b}"))),
                     glaze::lozenge_button("disabled lozenge button"),
                     iced::widget::toggler(self.le_toggle).on_toggle(Message::Toggled),
                     iced::widget::toggler(self.le_toggle),

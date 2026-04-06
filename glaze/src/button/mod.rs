@@ -84,8 +84,7 @@ pub struct GlazedButton<
     visual: ActiveVisual,
     content: Element<'a, Message, Theme, Renderer>,
     on_press: events::Event<'a, Message>,
-    on_hover_enter: events::Event<'a, Message>,
-    on_hover_leave: events::Event<'a, Message>,
+    on_hover: events::EventWithTwoStates<'a, Message>,
     size: Size<Length>,
     padding: Padding,
     clip: bool,
@@ -114,8 +113,7 @@ where
             visual,
             content,
             on_press: events::Event::None,
-            on_hover_enter: events::Event::None,
-            on_hover_leave: events::Event::None,
+            on_hover: events::EventWithTwoStates::None,
             size: Size::new(size.width.fluid(), size.height.fluid()),
             padding: DEFAULT_CONTENT_PADDING,
             clip: false,
@@ -148,14 +146,10 @@ where
     pub fn on_press(self) -> events::EventBuilder<'a, Self, Message> {
         events::EventBuilder::new(self, |s, e| s.on_press = e)
     }
-    /// Sets the message that will be produced when the cursor enters the [`GlazedButton`].
-    pub fn on_hover_enter(self) -> events::EventBuilder<'a, Self, Message> {
-        events::EventBuilder::new(self, |s, e| s.on_hover_enter = e)
-    }
 
-    /// Sets the message that will be produced when the cursor leaves the [`GlazedButton`].
-    pub fn on_hover_leave(self) -> events::EventBuilder<'a, Self, Message> {
-        events::EventBuilder::new(self, |s, e| s.on_hover_leave = e)
+    /// Sets the message that will be produced when the cursor enters the [`GlazedButton`].
+    pub fn on_hover(self) -> events::EventWithTwoStatesBuilder<'a, Self, Message> {
+        events::EventWithTwoStatesBuilder::new(self, |s, e| s.on_hover = e)
     }
 
     /// Sets whether the contents of the [`GlazedButton`] should be clipped on
@@ -293,11 +287,7 @@ where
         // ui consistency
         if state.is_hovered != cursor_is_over {
             state.is_hovered = cursor_is_over;
-
-            match state.is_hovered {
-                true => self.on_hover_enter.publish_to(shell),
-                false => self.on_hover_leave.publish_to(shell),
-            }
+            self.on_hover.publish_to(shell, state.is_hovered);
         }
 
         match event {
