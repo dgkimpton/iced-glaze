@@ -90,14 +90,13 @@ pub trait WidgetVisual<Renderer> {
 
     /// Extra space that provides room to render the Visual, e.g. space for borders,
     /// drop shadows, etc.
-    fn visual_size(&self) -> Padding;
+    fn visual_size() -> Padding;
 
     /// Test if the cursor location is considerd clickable for this Visual
-    fn hit_test(&self, layout: Layout<'_>, padding: &Padding, cursor: mouse::Cursor) -> bool;
+    fn hit_test(layout: Layout<'_>, padding: &Padding, cursor: mouse::Cursor) -> bool;
 
     /// Render the visual behind the content (e.g. button backgrounds)
     fn draw_lowlight(
-        &self,
         renderer: &mut Renderer,
         layout: &Layout<'_>,
         viewport: &Rectangle,
@@ -107,7 +106,6 @@ pub trait WidgetVisual<Renderer> {
 
     /// Render any highlights above the content (e.g. glimmer effects)
     fn draw_highlight(
-        &self,
         renderer: &mut Renderer,
         layout: &Layout<'_>,
         viewport: &Rectangle,
@@ -117,7 +115,6 @@ pub trait WidgetVisual<Renderer> {
 }
 
 /// A visual for button that renders nothing and has no styling or interaction
-#[derive(Default)]
 pub struct NullVisual {}
 
 /// A style that has no properties
@@ -130,16 +127,15 @@ where
 {
     type Style = NullStyle;
 
-    fn visual_size(&self) -> Padding {
+    fn visual_size() -> Padding {
         Padding::default()
     }
 
-    fn hit_test(&self, _layout: Layout<'_>, _padding: &Padding, _cursor: mouse::Cursor) -> bool {
+    fn hit_test(_layout: Layout<'_>, _padding: &Padding, _cursor: mouse::Cursor) -> bool {
         false
     }
 
     fn draw_lowlight(
-        &self,
         _renderer: &mut Renderer,
         _layout: &Layout<'_>,
         _viewport: &Rectangle,
@@ -149,7 +145,6 @@ where
     }
     
     fn draw_highlight(
-        &self,
         _renderer: &mut Renderer,
         _layout: &Layout<'_>,
         _viewport: &Rectangle,

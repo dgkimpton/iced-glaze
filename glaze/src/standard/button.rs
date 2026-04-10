@@ -9,7 +9,6 @@ use behaviours::button::{Status, StyleFn};
 
 /// Type used to hook the Visual Rendering of the [`glaze::GlazedButton`] class
 /// to provide background rendering for interactivity
-#[derive(Default)]
 pub struct Visual {}
 
 impl<Renderer> WidgetVisual<Renderer> for Visual
@@ -18,7 +17,7 @@ where
 {
     type Style = Style;
 
-    fn visual_size(&self) -> Padding {
+    fn visual_size() -> Padding {
         Padding {
             top: 2.0,
             bottom: 2.0,
@@ -27,12 +26,11 @@ where
         }
     }
 
-    fn hit_test(&self, layout: Layout<'_>, _padding: &Padding, cursor: mouse::Cursor) -> bool {
+    fn hit_test(layout: Layout<'_>, _padding: &Padding, cursor: mouse::Cursor) -> bool {
         cursor.is_over(layout.bounds())
     }
 
     fn draw_lowlight(
-        &self,
         renderer: &mut Renderer,
         layout: &Layout<'_>,
         _viewport: &Rectangle,
@@ -59,7 +57,6 @@ where
     }
     
     fn draw_highlight(
-        &self,
         _renderer: &mut Renderer,
         _layout: &Layout<'_>,
         _viewport: &Rectangle,

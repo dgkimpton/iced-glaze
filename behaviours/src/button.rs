@@ -15,6 +15,8 @@
 //!     button("Press me!").on_press().send(Message::ButtonPressed).into()
 //! }
 //! ```
+use std::marker::PhantomData;
+
 use iced::advanced::{
     self, Clipboard, Layout, Shell, Widget, layout, mouse, overlay, renderer,
     widget::{
@@ -81,7 +83,6 @@ pub struct GlazedButton<
     Renderer: advanced::renderer::Renderer,
     Theme: visuals::Catalog<Status, ActiveVisual::Style>,
 {
-    visual: ActiveVisual,
     content: Element<'a, Message, Theme, Renderer>,
     on_press: events::Event<'a, Message>,
     on_hover: events::EventWithTwoStates<'a, Message, bool>,
@@ -90,6 +91,7 @@ pub struct GlazedButton<
     clip: bool,
     class: Theme::Class<'a>,
     status: Option<Status>,
+    _visual: PhantomData<ActiveVisual>,
 }
 
 impl<'a, Message, Theme, Renderer, ActiveVisual>
@@ -102,15 +104,11 @@ where
     ActiveVisual::Style: visuals::VisualStyle,
 {
     /// Creates a new [`GlazedButton`] with the given content.
-    pub fn new(
-        content: impl Into<Element<'a, Message, Theme, Renderer>>,
-        visual: ActiveVisual,
-    ) -> Self {
+    pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
         let content = content.into();
         let size = content.as_widget().size_hint();
 
         Self {
-            visual,
             content,
             on_press: events::Event::None,
             on_hover: events::EventWithTwoStates::None,
@@ -119,6 +117,7 @@ where
             clip: false,
             class: Theme::default(),
             status: None,
+            _visual:PhantomData
         }
     }
 
@@ -226,7 +225,7 @@ where
             limits,
             self.size.width,
             self.size.height,
-            self.padding.expand(self.visual.visual_size()),
+            self.padding.expand(ActiveVisual::visual_size()),
             |limits| {
                 self.content
                     .as_widget_mut()
@@ -282,7 +281,7 @@ where
         let state = tree.state.downcast_mut::<State>();
 
         let current_status = if self.on_press.is_enabled() {
-            let cursor_is_over = self.visual.hit_test(layout, &self.padding, cursor);
+            let cursor_is_over = ActiveVisual::hit_test(layout, &self.padding, cursor);
 
             // Note: hover changes need to occur before press-events in order to preserve
             // ui consistency
@@ -376,8 +375,7 @@ where
         let status = self.status.unwrap_or(Status::Disabled);
         let style = theme.style(&self.class, status, render_style);
 
-        self.visual
-            .draw_lowlight(renderer, &layout, &viewport, &self.padding, &style);
+        ActiveVisual::draw_lowlight(renderer, &layout, &viewport, &self.padding, &style);
 
         let child_render_style = renderer::Style {
             text_color: style.text_color(),
@@ -394,8 +392,7 @@ where
             &viewport,
         );
 
-        self.visual
-            .draw_highlight(renderer, &layout, &viewport, &self.padding, &style);
+        ActiveVisual::draw_highlight(renderer, &layout, &viewport, &self.padding, &style);
     }
 
     fn mouse_interaction(
@@ -406,7 +403,7 @@ where
         _viewport: &Rectangle,
         _renderer: &Renderer,
     ) -> mouse::Interaction {
-        if self.on_press.is_enabled() && self.visual.hit_test(layout, &self.padding, cursor) {
+        if self.on_press.is_enabled() && ActiveVisual::hit_test(layout, &self.padding, cursor) {
             mouse::Interaction::Pointer
         } else {
             mouse::Interaction::default()

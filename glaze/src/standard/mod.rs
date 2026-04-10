@@ -9,5 +9,5 @@ where
     Theme: behaviours::visuals::Catalog<behaviours::button::Status, button::Style> + 'a,
     Renderer: iced::advanced::Renderer,
 {
-    behaviours::button::GlazedButton::new(content, button::Visual::default())
+    behaviours::button::GlazedButton::new(content)
 }
