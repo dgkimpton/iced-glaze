@@ -1,25 +1,28 @@
 //! Visual styling framework for the glaze
 //!
+//!
 use iced::advanced::{Layout, mouse, renderer};
 use iced::{Color, Padding, Rectangle};
 
-use crate::button::Status;
+/// Base trait for the [`VisualStyle`] of glazed widgets.
+pub trait VisualStyle {
+    /// The text color that will be inherited by the content of the widget
+    fn text_color(&self) -> Color;
+}
 
-/// A styling function for a [`Button`].
-pub type StyleFn<'a, Theme, ActiveVisualStyle> =
-    Box<dyn Fn(&Theme, Status, &renderer::Style) -> ActiveVisualStyle + 'a>;
+/// Sytling function that can be used with function based styles
+pub type StyleFn<'a, Theme, WidgetStatus, ActiveVisualStyle> =
+    Box<dyn Fn(&Theme, WidgetStatus, &renderer::Style) -> ActiveVisualStyle + 'a>;
 
-/// The theme catalog of a [`Button`].
+/// The theme catalog of a widget used by widget implementors to provided theming functions.
 ///
-/// All themes that can be used with [`Button`]
-/// must implement this trait.
+/// All themes that can be used with a glazed widget must implement this trait.
 ///
 /// # Example
 /// ```no_run
 /// # use iced::{Color, Background, advanced::renderer};
-/// # use glaze::button::{Status};
-/// # use glaze::button::visual::{Catalog};
-/// # use glaze::button::standard::{Style};
+/// # use glaze::button::Status;
+/// # use glaze::button::standard::Style;
 /// # struct MyTheme;
 /// #[derive(Debug, Default)]
 /// pub enum ButtonClass {
@@ -29,14 +32,15 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 ///     Danger
 /// }
 ///
-/// impl Catalog<Style> for MyTheme {
+/// // TODO: Styles are defined per visual, so this example needs fixing
+///
+/// impl iced_plus::visuals::Catalog<button::Status, Style> for MyTheme {
 ///     type Class<'a> = ButtonClass;
 ///     
 ///     fn default<'a>() -> Self::Class<'a> {
 ///         ButtonClass::default()
 ///     }
 ///     
-///
 ///     fn style(&self, class: &Self::Class<'_>, status: Status, _inherited: &renderer::Style) -> Style {
 ///         let mut style = Style::default();
 ///
@@ -56,11 +60,7 @@ pub type StyleFn<'a, Theme, ActiveVisualStyle> =
 ///     }
 /// }
 /// ```
-///
-/// Although, in order to use [`Button::style`]
-/// with `MyTheme`, [`Catalog::Class`] must implement
-/// `From<StyleFn<'_, MyTheme>>`.
-pub trait Catalog<ActiveVisualStyle>
+pub trait Catalog<Status, ActiveVisualStyle>
 where
     ActiveVisualStyle: VisualStyle,
 {
@@ -79,18 +79,12 @@ where
     ) -> ActiveVisualStyle;
 }
 
-/// Base trait for the [`VisualStyle`] of [`glaze::Button`]'s.
-pub trait VisualStyle {
-    /// The text color that will be inherited by the [`content`] of the [`glaze::Button`]
-    fn text_color(&self) -> Color;
-}
-
-/// Trait that should be implemented to define the actual rendering of [`VisualStyle`]'s.
+/// Trait that should be implemented to define the actual rendering of a [`WidgetVisual`].
 /// Lowlights are drawn below the `content` and highlights are drawn above the `content`.
-/// `visual_size` is added to the `padding`` of [`glaze::Button`] to determine how big the button
-/// actually is. The visual_size returned by the [`Visual`] should be sufficient to contain
-/// all the rendering done by the [`Visual`].
-pub trait ButtonVisual<Renderer> {
+/// `visual_size` is added to the `padding`` of the widget to determine how big the widget
+/// actually is. The visual_size returned by the [`WidgetVisual`] should be sufficient to contain
+/// all the rendering done by the [`WidgetVisual`].
+pub trait WidgetVisual<Renderer> {
     /// The style type that relates to this Visual
     type Style;
 
@@ -114,11 +108,59 @@ pub trait ButtonVisual<Renderer> {
     /// Render any highlights above the content (e.g. glimmer effects)
     fn draw_highlight(
         &self,
+        renderer: &mut Renderer,
+        layout: &Layout<'_>,
+        viewport: &Rectangle,
+        padding: &Padding,
+        style: &Self::Style,
+    );
+}
+
+/// A visual for button that renders nothing and has no styling or interaction
+#[derive(Default)]
+pub struct NullVisual {}
+
+/// A style that has no properties
+#[derive(Default)]
+pub struct NullStyle {}
+
+impl<Renderer> WidgetVisual<Renderer> for NullVisual
+where
+    Renderer: renderer::Renderer,
+{
+    type Style = NullStyle;
+
+    fn visual_size(&self) -> Padding {
+        Padding::default()
+    }
+
+    fn hit_test(&self, _layout: Layout<'_>, _padding: &Padding, _cursor: mouse::Cursor) -> bool {
+        false
+    }
+
+    fn draw_lowlight(
+        &self,
         _renderer: &mut Renderer,
         _layout: &Layout<'_>,
         _viewport: &Rectangle,
         _padding: &Padding,
         _style: &Self::Style,
     ) {
+    }
+    
+    fn draw_highlight(
+        &self,
+        _renderer: &mut Renderer,
+        _layout: &Layout<'_>,
+        _viewport: &Rectangle,
+        _padding: &Padding,
+        _style: &Self::Style,
+    ) {
+    }
+}
+
+impl VisualStyle for NullStyle {
+    fn text_color(&self) -> Color {
+        Color::BLACK
     }
 }

@@ -6,17 +6,15 @@ use iced::border::{Border, Radius};
 use iced::theme::palette;
 use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
 
-use crate::button::{
-    Status,
-    visual::{ButtonVisual, Catalog, StyleFn, VisualStyle},
-};
+use behaviours::visuals::{WidgetVisual, Catalog, VisualStyle};
+use behaviours::button::{Status, StyleFn};
 
 /// Type used to hook the Visual Rendering of the [`glaze::Button`] class
 /// to provide background rendering for interactivity
 #[derive(Default)]
 pub struct Visual {}
 
-impl<Renderer> ButtonVisual<Renderer> for Visual
+impl<Renderer> WidgetVisual<Renderer> for Visual
 where
     Renderer: advanced::renderer::Renderer,
 {
@@ -56,7 +54,7 @@ where
 
         let bounds = layout.bounds();
 
-        let space = <Visual as ButtonVisual<Renderer>>::visual_size(self);
+        let space = <Visual as WidgetVisual<Renderer>>::visual_size(self);
 
         let lozenge_bounds = if style.is_expanded {
             Rectangle {
@@ -90,6 +88,16 @@ where
             style.color,
         );
     }
+    
+    fn draw_highlight(
+        &self,
+        _renderer: &mut Renderer,
+        _layout: &Layout<'_>,
+        _viewport: &Rectangle,
+        _padding: &Padding,
+        _style: &Self::Style,
+    ) {
+    }
 }
 
 /// The style of a lozenge button.
@@ -111,7 +119,7 @@ impl VisualStyle for Style {
     }
 }
 
-impl Catalog<Style> for Theme {
+impl Catalog<Status, Style> for Theme {
     type Class<'a> = StyleFn<'a, Self, Style>;
 
     fn default<'a>() -> Self::Class<'a> {

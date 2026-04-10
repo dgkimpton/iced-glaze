@@ -25,13 +25,13 @@ use iced::advanced::{
 use iced::touch;
 use iced::window;
 use iced::{Element, Event, Length, Padding, Rectangle, Size, Vector};
-use iced_plus::{padding::PaddingExtensions, *};
+use iced_plus::padding::PaddingExtensions;
 
-pub mod lozenge;
-pub mod standard;
-pub mod visual;
+use super::events;
+use super::visuals;
 
-use visual::{ButtonVisual, Catalog, StyleFn, VisualStyle};
+pub type StyleFn<'a, Theme, ActiveVisualStyle> =
+    visuals::StyleFn<'a, Theme, Status, ActiveVisualStyle>;
 
 /// A generic widget that produces a message when pressed.
 ///
@@ -73,18 +73,18 @@ pub struct GlazedButton<
     Message,
     Theme = crate::Theme,
     Renderer = crate::Renderer,
-    ActiveVisual = standard::Visual,
+    ActiveVisual = visuals::NullVisual,
 > where
     Message: Clone,
-    ActiveVisual: ButtonVisual<Renderer>,
-    ActiveVisual::Style: VisualStyle,
+    ActiveVisual: visuals::WidgetVisual<Renderer>,
+    ActiveVisual::Style: visuals::VisualStyle,
     Renderer: advanced::renderer::Renderer,
-    Theme: Catalog<ActiveVisual::Style>,
+    Theme: visuals::Catalog<Status, ActiveVisual::Style>,
 {
     visual: ActiveVisual,
     content: Element<'a, Message, Theme, Renderer>,
     on_press: events::Event<'a, Message>,
-    on_hover: events::EventWithTwoStates<'a, Message>,
+    on_hover: events::EventWithTwoStates<'a, Message, bool>,
     size: Size<Length>,
     padding: Padding,
     clip: bool,
@@ -97,11 +97,11 @@ impl<'a, Message, Theme, Renderer, ActiveVisual>
 where
     Message: Clone,
     Renderer: advanced::renderer::Renderer,
-    ActiveVisual: ButtonVisual<Renderer>,
-    Theme: Catalog<ActiveVisual::Style>,
-    ActiveVisual::Style: VisualStyle,
+    ActiveVisual: visuals::WidgetVisual<Renderer>,
+    Theme: visuals::Catalog<Status, ActiveVisual::Style>,
+    ActiveVisual::Style: visuals::VisualStyle,
 {
-    /// Creates a new [`Button`] with the given content.
+    /// Creates a new [`GlazedButton`] with the given content.
     pub fn new(
         content: impl Into<Element<'a, Message, Theme, Renderer>>,
         visual: ActiveVisual,
@@ -148,8 +148,8 @@ where
     }
 
     /// Sets the message that will be produced when the cursor enters the [`GlazedButton`].
-    pub fn on_hover(self) -> events::EventWithTwoStatesBuilder<'a, Self, Message> {
-        events::EventWithTwoStatesBuilder::new(self, |s, e| s.on_hover = e)
+    pub fn on_hover(self) -> events::EventWithTwoStatesBuilder<'a, Self, Message, bool> {
+        events::EventWithTwoStatesBuilder::new(self, true, |s, e| s.on_hover = e)
     }
 
     /// Sets whether the contents of the [`GlazedButton`] should be clipped on
@@ -159,7 +159,7 @@ where
         self
     }
 
-    /// Sets the style of the [`Button`].
+    /// Sets the style of the [`GlazedButton`].
     #[must_use]
     pub fn style(
         mut self,
@@ -172,7 +172,7 @@ where
         self
     }
 
-    /// Sets the style class of the [`Button`].
+    /// Sets the style class of the [`GlazedButton`].
     #[cfg(feature = "advanced")]
     #[must_use]
     pub fn class(mut self, class: impl Into<Theme::Class<'a>>) -> Self {
@@ -192,9 +192,9 @@ impl<'a, Message, Theme, Renderer, ActiveVisual> Widget<Message, Theme, Renderer
 where
     Message: 'a + Clone,
     Renderer: 'a + advanced::renderer::Renderer,
-    ActiveVisual: ButtonVisual<Renderer>,
-    ActiveVisual::Style: VisualStyle,
-    Theme: Catalog<ActiveVisual::Style>,
+    ActiveVisual: visuals::WidgetVisual<Renderer>,
+    ActiveVisual::Style: visuals::VisualStyle,
+    Theme: visuals::Catalog<Status, ActiveVisual::Style>,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -280,57 +280,77 @@ where
         }
 
         let state = tree.state.downcast_mut::<State>();
-        let is_enabled = self.on_press.is_active();
-        let cursor_is_over = is_enabled && self.visual.hit_test(layout, &self.padding, cursor);
 
-        // Note: hover changes need to occur before press-events in order to preserve
-        // ui consistency
-        if state.is_hovered != cursor_is_over {
-            state.is_hovered = cursor_is_over;
-            self.on_hover.publish_to(shell, state.is_hovered);
-        }
+        let current_status = if self.on_press.is_enabled() {
+            let cursor_is_over = self.visual.hit_test(layout, &self.padding, cursor);
 
-        match event {
-            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
-            | Event::Touch(touch::Event::FingerPressed { .. }) => {
-                if cursor_is_over {
-                    state.is_pressed = true;
-                    shell.capture_event();
-                }
+            // Note: hover changes need to occur before press-events in order to preserve
+            // ui consistency
+            if state.is_hovered != cursor_is_over {
+                state.is_hovered = cursor_is_over;
+                self.on_hover.publish_to(shell, state.is_hovered);
             }
 
-            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
-            | Event::Touch(touch::Event::FingerLifted { .. }) => {
-                if is_enabled {
+            match event {
+                Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+                | Event::Touch(touch::Event::FingerPressed { .. }) => {
+                    if cursor_is_over {
+                        state.is_pressed = true;
+                        shell.capture_event();
+                    }
+                }
+
+                Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left))
+                | Event::Touch(touch::Event::FingerLifted { .. }) => {
                     if state.is_pressed {
                         state.is_pressed = false;
 
                         if cursor_is_over {
                             self.on_press.publish_to(shell);
+                            // Note: the press event may have changed the state of the application
+                            // so we need to resend the hover message so that the UI can reflect that
+                            self.on_hover.publish_to(shell, state.is_hovered);
                         }
 
                         shell.capture_event();
                     }
                 }
+
+                Event::Touch(touch::Event::FingerLost { .. }) => {
+                    state.is_pressed = false;
+                }
+
+                _ => {}
             }
 
-            Event::Touch(touch::Event::FingerLost { .. }) => {
+            if state.is_pressed {
+                Status::Pressed
+            } else if state.is_hovered {
+                Status::Hovered
+            } else {
+                Status::Active
+            }
+        } else {
+            if let Some(current_status) = self.status
+                && current_status != Status::Disabled
+            {
+                // when disabling an active button clear the state so that if it becomes
+                // enabled again we start from a clean position
+                if state.is_hovered {
+                    state.is_hovered = false;
+                    self.on_hover.publish_to(shell, false);
+                }
                 state.is_pressed = false;
             }
 
-            _ => {}
-        }
-
-        let current_status = match (is_enabled, cursor_is_over, state.is_pressed) {
-            (true, true, true) => Status::Pressed,
-            (true, true, false) => Status::Hovered,
-            (true, _, _) => Status::Active,
-            _ => Status::Disabled,
+            Status::Disabled
         };
 
         if let Event::Window(window::Event::RedrawRequested(_now)) = event {
             self.status = Some(current_status);
-        } else if self.status.is_some_and(|status| status != current_status) {
+        } else if let Some(status) = self.status
+            && status != current_status
+        {
             shell.request_redraw();
         }
     }
@@ -345,6 +365,8 @@ where
         cursor: mouse::Cursor,
         viewport: &Rectangle,
     ) {
+        use visuals::VisualStyle;
+
         let viewport = if self.clip {
             layout.bounds().intersection(viewport).unwrap_or(*viewport)
         } else {
@@ -384,7 +406,7 @@ where
         _viewport: &Rectangle,
         _renderer: &Renderer,
     ) -> mouse::Interaction {
-        if self.on_press.is_active() && self.visual.hit_test(layout, &self.padding, cursor) {
+        if self.on_press.is_enabled() && self.visual.hit_test(layout, &self.padding, cursor) {
             mouse::Interaction::Pointer
         } else {
             mouse::Interaction::default()
@@ -414,9 +436,9 @@ impl<'a, Message, Theme, Renderer, ActiveVisual>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    ActiveVisual: ButtonVisual<Renderer> + 'a,
-    ActiveVisual::Style: VisualStyle + 'a,
-    Theme: Catalog<ActiveVisual::Style> + 'a,
+    ActiveVisual: visuals::WidgetVisual<Renderer> + 'a,
+    ActiveVisual::Style: visuals::VisualStyle + 'a,
+    Theme: visuals::Catalog<Status, ActiveVisual::Style> + 'a,
     Renderer: advanced::renderer::Renderer + 'a,
 {
     fn from(button: GlazedButton<'a, Message, Theme, Renderer, ActiveVisual>) -> Self {
@@ -424,7 +446,7 @@ where
     }
 }
 
-/// The default [`Padding`] of a [`Button`].
+/// The default [`Padding`] of a [`GlazedButton`].
 pub const DEFAULT_CONTENT_PADDING: Padding = Padding {
     top: 3.0,
     bottom: 3.0,

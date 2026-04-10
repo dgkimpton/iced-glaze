@@ -2,7 +2,7 @@ use iced::{widget::Container, *};
 
 fn main() -> Result {
     application(Glazed::default, Glazed::update, Glazed::view)
-        .theme(Theme::SolarizedLight)
+        .theme(Theme::Light)
         .run()
 }
 
@@ -18,7 +18,10 @@ enum Message {
     Toggled(bool),
     ShowStatus(String),
     ClearStatus,
+    TextEntered(String),
 }
+
+use glaze::lozenge as w;
 
 impl Glazed {
     fn view(&self) -> Element<'_, Message> {
@@ -26,18 +29,22 @@ impl Glazed {
             widget::row![
                 widget::column![
                     widget::text("Widget explorer application for the iced-glaze widgets"),
-                    surround(glaze::button("A button").on_press().send(Message::Clicked)),
-                    surround(glaze::button("disabled button")),
                     surround(
-                        glaze::lozenge_button("lozenge button")
+                        glaze::standard::button("A button")
                             .on_press()
                             .send(Message::Clicked)
                     ),
-                    surround(glaze::lozenge_button("disabled lozenge button")),
+                    surround(glaze::standard::button("disabled button")),
+                    surround(
+                        glaze::lozenge::button("lozenge button")
+                            .on_press()
+                            .send(Message::Clicked)
+                    ),
+                    surround(glaze::lozenge::button("disabled lozenge button")),
                 ],
                 widget::column![
                     iced::widget::button("test"),
-                    glaze::button("A button")
+                    w::button("A button")
                         .on_press()
                         .send(Message::Clicked)
                         .on_hover()
@@ -45,14 +52,16 @@ impl Glazed {
                             Message::ShowStatus(String::from("A button")),
                             Message::ClearStatus
                         ),
-                    glaze::button("disabled button"),
-                    glaze::lozenge_button("lozenge button")
+                    w::button("disabled button"),
+                    w::button("lozenge button")
                         .on_press()
                         .send(Message::Clicked)
-                        .on_hover().send_with(|b| Message::ShowStatus(format!("Lozenge Button Hovered {b}"))),
-                    glaze::lozenge_button("disabled lozenge button"),
+                        .on_hover()
+                        .send_with(|b| Message::ShowStatus(format!("Lozenge Button Hovered {b}"))),
+                    w::button("disabled lozenge button"),
                     iced::widget::toggler(self.le_toggle).on_toggle(Message::Toggled),
                     iced::widget::toggler(self.le_toggle),
+                    iced::widget::text_input("", "").on_input(Message::TextEntered)
                 ]
             ],
             widget::text(format!(
@@ -80,6 +89,10 @@ impl Glazed {
             }
             Message::ClearStatus => {
                 self.status_string = None;
+                Task::none()
+            }
+            Message::TextEntered(txt) => {
+                println!("Text: {txt}");
                 Task::none()
             }
         }

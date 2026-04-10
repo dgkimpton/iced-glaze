@@ -251,6 +251,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "behaviours"
+version = "0.1.0"
+dependencies = [
+ "iced",
+ "iced_plus",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1002,6 +1010,7 @@ checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
 name = "glaze"
 version = "0.1.0"
 dependencies = [
+ "behaviours",
  "iced",
  "iced_plus",
 ]

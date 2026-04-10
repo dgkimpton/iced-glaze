@@ -4,18 +4,15 @@ use iced::advanced::{Layout, mouse, renderer};
 use iced::border::{self, Border};
 use iced::theme::palette;
 use iced::{Background, Color, Padding, Rectangle, Shadow, Theme, advanced};
+use behaviours::visuals::{WidgetVisual, Catalog, VisualStyle};
+use behaviours::button::{Status, StyleFn};
 
-use crate::button::{
-    Status,
-    visual::{ButtonVisual, Catalog, StyleFn, VisualStyle},
-};
-
-/// Type used to hook the Visual Rendering of the [`glaze::Button`] class
+/// Type used to hook the Visual Rendering of the [`glaze::GlazedButton`] class
 /// to provide background rendering for interactivity
 #[derive(Default)]
 pub struct Visual {}
 
-impl<Renderer> ButtonVisual<Renderer> for Visual
+impl<Renderer> WidgetVisual<Renderer> for Visual
 where
     Renderer: advanced::renderer::Renderer,
 {
@@ -60,11 +57,21 @@ where
             );
         }
     }
+    
+    fn draw_highlight(
+        &self,
+        _renderer: &mut Renderer,
+        _layout: &Layout<'_>,
+        _viewport: &Rectangle,
+        _padding: &Padding,
+        _style: &Self::Style,
+    ) {
+    }
 }
 
 /// The style of a standard button.
 ///
-/// If not specified with [`Button::style`]
+/// If not specified with [`GlazedButton::style`]
 /// the theme will provide the style.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Style {
@@ -108,7 +115,7 @@ impl VisualStyle for Style {
     }
 }
 
-impl Catalog<Style> for Theme {
+impl Catalog<Status, Style> for Theme {
     type Class<'a> = StyleFn<'a, Self, Style>;
 
     fn default<'a>() -> Self::Class<'a> {
