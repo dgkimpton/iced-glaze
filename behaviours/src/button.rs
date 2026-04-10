@@ -117,7 +117,7 @@ where
             clip: false,
             class: Theme::default(),
             status: None,
-            _visual:PhantomData
+            _visual: PhantomData,
         }
     }
 
@@ -278,9 +278,8 @@ where
             return;
         }
 
-        let state = tree.state.downcast_mut::<State>();
-
         let current_status = if self.on_press.is_enabled() {
+            let state = tree.state.downcast_mut::<State>();
             let cursor_is_over = ActiveVisual::hit_test(layout, &self.padding, cursor);
 
             // Note: hover changes need to occur before press-events in order to preserve
@@ -333,6 +332,8 @@ where
             if let Some(current_status) = self.status
                 && current_status != Status::Disabled
             {
+                let state = tree.state.downcast_mut::<State>();
+
                 // when disabling an active button clear the state so that if it becomes
                 // enabled again we start from a clean position
                 if state.is_hovered {
